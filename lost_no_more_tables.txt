@@ -1,0 +1,63 @@
+-- USERS TABLE
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    firebase_uid VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(100),
+	course VARCHAR(50),
+    email VARCHAR(150) UNIQUE NOT NULL,
+    role VARCHAR(20) DEFAULT 'student'
+        CHECK (role IN ('student', 'admin')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ITEMS TABLE (Lost + Found)
+CREATE TABLE items (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    
+    item_code VARCHAR(20) UNIQUE,
+    
+    title VARCHAR(255),
+    description TEXT,
+    category VARCHAR(100),
+    location VARCHAR(255),
+    image_url TEXT,
+    
+    type VARCHAR(10)
+        CHECK (type IN ('lost', 'found')),
+    
+    status VARCHAR(20) DEFAULT 'pending'
+        CHECK (status IN ('pending', 'approved', 'rejected', 'claimed')),
+    
+    handed_to_security BOOLEAN DEFAULT FALSE,
+    is_approved BOOLEAN DEFAULT FALSE,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- REPORTS TABLE
+CREATE TABLE reports (
+    id SERIAL PRIMARY KEY,
+    item_id INT REFERENCES items(id) ON DELETE CASCADE,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    
+    type VARCHAR(20)
+        CHECK (type IN ('claim', 'report')),
+    
+    message TEXT,
+    status VARCHAR(20) DEFAULT 'pending',
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- NOTIFICATIONS TABLE
+CREATE TABLE notifications (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    
+    message TEXT,
+    is_read BOOLEAN DEFAULT FALSE,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
