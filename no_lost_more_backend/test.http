@@ -1,3 +1,6 @@
+### USERS ROUTES ###
+
+# Login / Create User
 POST http://localhost:3000/users/login
 Content-Type: application/json
 
@@ -7,3 +10,74 @@ Content-Type: application/json
   "name": "Krish Patel",
   "course": "Computer Science"
 }
+
+### ITEMS ROUTES ###
+
+# Create Item (Lost/Found)
+POST http://localhost:3000/items
+Content-Type: application/json
+
+{
+  "user_id": 1,
+  "item_code": "ITEM001",
+  "title": "Lost Wallet",
+  "description": "Black leather wallet",
+  "category": "Wallet",
+  "location": "Library",
+  "image_url": "",
+  "type": "lost"
+}
+
+# Get All Items
+GET http://localhost:3000/items
+
+# Update Item Status
+PUT http://localhost:3000/items/1/status
+Content-Type: application/json
+
+{
+  "status": "approved",
+  "handed_to_security": true,
+  "is_approved": true
+}
+
+### REPORTS ROUTES ###
+
+# Create Report (Claim/Report)
+POST http://localhost:3000/reports
+Content-Type: application/json
+
+{
+  "item_id": 1,
+  "user_id": 1,
+  "type": "claim",
+  "message": "I lost this wallet yesterday"
+}
+
+# Get All Reports
+GET http://localhost:3000/reports
+
+# Update Report Status
+PUT http://localhost:3000/reports/1/status
+Content-Type: application/json
+
+{
+  "status": "approved"
+}
+
+### NOTIFICATIONS ROUTES ###
+
+# Create Notification
+POST http://localhost:3000/notifications
+Content-Type: application/json
+
+{
+  "user_id": 1,
+  "message": "Your claim has been approved!"
+}
+
+# Get Notifications for a User
+GET http://localhost:3000/notifications/1
+
+# Mark Notification as Read
+PUT http://localhost:3000/notifications/1/read
