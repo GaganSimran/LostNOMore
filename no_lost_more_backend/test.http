@@ -1,0 +1,9 @@
+POST http://localhost:3000/users/login
+Content-Type: application/json
+
+{
+  "firebase_uid": "user001",
+  "email": "test1@gmail.com",
+  "name": "Krish Patel",
+  "course": "Computer Science"
+}
