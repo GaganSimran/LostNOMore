@@ -6,6 +6,7 @@ class ForgetPasswordScreen extends StatefulWidget {
   _ForgetPasswordScreenState createState() => _ForgetPasswordScreenState();
 }
 
+
 class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
   final TextEditingController emailController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance; // Firebase auth
