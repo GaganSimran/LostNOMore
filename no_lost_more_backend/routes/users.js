@@ -4,7 +4,7 @@ const pool = require('../db');
 
 router.post('/login', async (req, res) => {
   try {
-    const { firebase_uid, email, name, course } = req.body;
+    const { firebase_uid, email, name, course, phone, address } = req.body;
 
     let user = await pool.query(
       'SELECT * FROM users WHERE firebase_uid=$1',
@@ -13,8 +13,11 @@ router.post('/login', async (req, res) => {
 
     if (user.rows.length === 0) {
       user = await pool.query(
-        `INSERT INTO users (firebase_uid, email, name, course) VALUES ($1,$2,$3,$4) RETURNING *`,
-        [firebase_uid, email, name, course]
+        `INSERT INTO users 
+        (firebase_uid, email, name, course, phone, address) 
+        VALUES ($1,$2,$3,$4,$5,$6) 
+        RETURNING *`,
+        [firebase_uid, email, name, course, phone, address]
       );
     }
 
@@ -26,4 +29,4 @@ router.post('/login', async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = router; 
