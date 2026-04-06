@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 class SignupScreen extends StatefulWidget {
   @override
   _SignupScreenState createState() => _SignupScreenState();
@@ -15,12 +16,24 @@ class _SignupScreenState extends State<SignupScreen> {
   bool isPasswordHidden = true;
   bool isConfirmPasswordHidden = true;
 
-  void handleSignup() {
-    print("Name: ${nameController.text}");
-    print("Email: ${emailController.text}");
-    print("Phone: ${phoneController.text}");
-    print("Password: ${passwordController.text}");
-    print("Confirm Password: ${confirmPasswordController.text}");
+  void handleSignup() async {
+    final url = Uri.parse("http://10.0.2.2:3000/users/signup");
+
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "firebase_uid": "temp_uid_123", // later Firebase will replace this
+        "email": emailController.text,
+        "name": nameController.text,
+        "course": "flutter",
+        "phone": phoneController.text,
+        "address": "test address"
+      }),
+    );
+
+    print("STATUS CODE: ${response.statusCode}");
+    print("RESPONSE BODY: ${response.body}");
   }
 
   @override
