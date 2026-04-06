@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ForgetPasswordScreen extends StatefulWidget {
   @override
@@ -7,8 +8,10 @@ class ForgetPasswordScreen extends StatefulWidget {
 
 class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
   final TextEditingController emailController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance; // Firebase auth
+  bool _isLoading = false;
 
-  void handleResetPassword() {
+  void handleResetPassword() async {
     String email = emailController.text.trim();
 
     if (email.isEmpty) {
@@ -18,14 +21,33 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
       return;
     }
 
-    // Simple test action
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Reset link sent to $email (test mode)"),
-      ),
-    );
+    setState(() {
+      _isLoading = true;
+    });
 
-    print("Reset password requested for: $email");
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Password reset email sent to $email"),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      emailController.clear();
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message ?? "Failed to send reset email"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -41,20 +63,13 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
           children: [
             SizedBox(height: 30),
 
-            Icon(
-              Icons.lock_reset,
-              size: 80,
-              color: Colors.blue,
-            ),
+            Icon(Icons.lock_reset, size: 80, color: Colors.blue),
 
             SizedBox(height: 20),
 
             Text(
               "Reset your password",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
 
             SizedBox(height: 10),
@@ -81,7 +96,9 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
 
             SizedBox(height: 20),
 
-            SizedBox(
+            _isLoading
+                ? CircularProgressIndicator()
+                : SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
