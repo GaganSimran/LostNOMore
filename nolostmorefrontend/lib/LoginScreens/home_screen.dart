@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'lost_screen.dart';   // Make sure this file has class LostScreen
-import 'found_screen.dart';  // Make sure this file has class FoundScreen
+import 'lost_screen.dart';
+import 'found_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final String username;
@@ -12,7 +12,6 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      // Main Body
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -23,32 +22,42 @@ class HomeScreen extends StatelessWidget {
               Text(
                 "Hello, $username",
                 style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold
-                ),
+                    fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 4),
               Text(
-                "What would you like to do today?",
+                "Discover what's happening on Campus",
                 style: TextStyle(fontSize: 16, color: Colors.grey[700]),
               ),
               const Divider(height: 30),
 
-              // Action Buttons
-              _buildActionButton(
-                context,
-                question: "Missing something?",
-                label: "Lost",
-                color: Colors.red[900]!,
-                navigateTo: LostScreen(),
-              ),
-              const SizedBox(height: 20),
-              _buildActionButton(
-                context,
-                question: "Found something?",
-                label: "Found",
-                color: Colors.green[800]!,
-                navigateTo: FoundScreen(),
+              // Grey Box containing Lost / Found
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Column(
+                  children: [
+                    _buildActionButton(
+                      context,
+                      question: "Missing something?",
+                      label: "Lost",
+                      color: Colors.red[900]!,
+                      navigateTo: LostScreen(),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildActionButton(
+                      context,
+                      question: "Found something?",
+                      label: "Found",
+                      color: Colors.green[800]!,
+                      navigateTo: FoundScreen(),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -74,7 +83,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Widget to build the action button
   Widget _buildActionButton(BuildContext context,
       {required String question,
         required String label,
@@ -82,7 +90,11 @@ class HomeScreen extends StatelessWidget {
         required Widget navigateTo}) {
     return Column(
       children: [
-        Text(question, style: const TextStyle(fontWeight: FontWeight.w500)),
+        Text(
+          question,
+          textAlign: TextAlign.center,  // Center the question
+          style: const TextStyle(fontWeight: FontWeight.w500),
+        ),
         const SizedBox(height: 8),
         ElevatedButton(
           onPressed: () {
