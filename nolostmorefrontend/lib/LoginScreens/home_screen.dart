@@ -17,7 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Screens for Bottom Navigation
   final List<Widget> _screens = [
-    Placeholder(), // Home content
+    Placeholder(), // Home content (we override in body)
     const SearchScreen(),
     Placeholder(), // Post screen
     Placeholder(), // Notifications screen
@@ -50,11 +50,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _homeContent() {
     return SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Greeting
             Text(
               "Hello, ${widget.username}",
               style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
@@ -65,20 +66,34 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(fontSize: 16, color: Colors.grey[700]),
             ),
             const Divider(height: 30),
-            _buildActionButton(
-              context,
-              question: "Missing something?",
-              label: "Lost",
-              color: Colors.red[900]!,
-              navigateTo: LostScreen(),
-            ),
-            const SizedBox(height: 20),
-            _buildActionButton(
-              context,
-              question: "Found something?",
-              label: "Found",
-              color: Colors.green[800]!,
-              navigateTo:  FoundScreen(),
+
+            // Grey Box containing Lost / Found buttons
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Column(
+                children: [
+                  _buildActionButton(
+                    context,
+                    question: "Missing something?",
+                    label: "Lost",
+                    color: Colors.red[900]!,
+                    navigateTo:  LostScreen(),
+                  ),
+                  const SizedBox(height: 20),
+                  _buildActionButton(
+                    context,
+                    question: "Found something?",
+                    label: "Found",
+                    color: Colors.green[800]!,
+                    navigateTo:  FoundScreen(),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -92,8 +107,16 @@ class _HomeScreenState extends State<HomeScreen> {
         required Color color,
         required Widget navigateTo}) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(question, style: const TextStyle(fontWeight: FontWeight.w500)),
+        Text(
+          question,
+          style: const TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 16,
+          ),
+          textAlign: TextAlign.center,
+        ),
         const SizedBox(height: 8),
         ElevatedButton(
           onPressed: () {
@@ -104,10 +127,12 @@ class _HomeScreenState extends State<HomeScreen> {
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: color,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8)),
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
           ),
-          child: Text(label, style: const TextStyle(color: Colors.white)),
+          child: Text(label,
+              style: const TextStyle(color: Colors.white, fontSize: 16)),
         ),
       ],
     );
