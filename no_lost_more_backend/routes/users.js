@@ -3,10 +3,12 @@ const router = express.Router();
 const pool = require('../db');
 
 //
-// 🔥 SIGNUP (Create user in PostgreSQL)
+// 🔥 SIGNUP
 //
 router.post('/signup', async (req, res) => {
   try {
+    console.log("BODY:", req.body);
+
     const { firebase_uid, email, name, course, phone, address } = req.body;
 
     const userExists = await pool.query(
@@ -21,7 +23,8 @@ router.post('/signup', async (req, res) => {
     }
 
     const newUser = await pool.query(
-      `INSERT INTO users (firebase_uid, email, name, course, phone, address)
+      `INSERT INTO users
+       (firebase_uid, email, name, course, phone, address)
        VALUES ($1,$2,$3,$4,$5,$6)
        RETURNING *`,
       [firebase_uid, email, name, course, phone, address]
@@ -31,13 +34,12 @@ router.post('/signup', async (req, res) => {
 
   } catch (err) {
     console.error(err);
-    res.status(500).send("Server Error");
+    res.status(500).json({ error: err.message });
   }
 });
 
-
 //
-// 🔐 LOGIN (Get user from PostgreSQL)
+// 🔐 LOGIN
 //
 router.post('/login', async (req, res) => {
   try {
@@ -58,7 +60,7 @@ router.post('/login', async (req, res) => {
 
   } catch (err) {
     console.error(err);
-    res.status(500).send("Server Error");
+    res.status(500).json({ error: err.message });
   }
 });
 
