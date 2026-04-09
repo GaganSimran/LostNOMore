@@ -38,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
       print("✅ Email verified — login success");
 
       // ✅ SEND DATA TO BACKEND
-      final url = Uri.parse("http://localhost:3000/users/signup");
+      final url = Uri.parse("http://192.168.2.27:3000/users/signup");
 
       final response = await http.post(
         url,
