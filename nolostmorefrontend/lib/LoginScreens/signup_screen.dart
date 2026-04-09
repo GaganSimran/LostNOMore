@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 class SignupScreen extends StatefulWidget {
   @override
   _SignupScreenState createState() => _SignupScreenState();
@@ -15,27 +16,42 @@ class _SignupScreenState extends State<SignupScreen> {
 
   bool isPasswordHidden = true;
   bool isConfirmPasswordHidden = true;
-
   void handleSignup() async {
-    final url = Uri.parse("http://10.0.2.2:3000/users/signup");
+    try {
+      // ✅ VALIDATIONS
+      if (passwordController.text != confirmPasswordController.text) {
+        print("❌ Passwords do not match");
+        return;
+      }
 
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "firebase_uid": "temp_uid_123", // later Firebase will replace this
-        "email": emailController.text,
-        "name": nameController.text,
-        "course": "flutter",
-        "phone": phoneController.text,
-        "address": "test address"
-      }),
-    );
+      if (!emailController.text.contains("@gmail.com")) {
+        print("❌ Invalid email");
+        return;
+      }
 
-    print("STATUS CODE: ${response.statusCode}");
-    print("RESPONSE BODY: ${response.body}");
+      if (phoneController.text.length != 10) {
+        print("❌ Phone must be 10 digits");
+        return;
+      }
+
+      // ✅ CREATE USER IN FIREBASE
+      UserCredential userCredential =
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      User? user = userCredential.user;
+
+      // ✅ SEND VERIFICATION EMAIL
+      await user!.sendEmailVerification();
+
+      print("📩 Verification email sent!");
+
+    } catch (e) {
+      print("❌ ERROR: $e");
+    }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

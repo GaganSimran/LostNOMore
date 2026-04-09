@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'forget_password_screen.dart';
 import 'signup_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -14,11 +17,49 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isPasswordHidden = true;
   bool rememberMe = true;
 
-  void handleLogin() {
-    print("Email: ${emailController.text}");
-    print("Password: ${passwordController.text}");
-  }
+  void handleLogin() async {
+    try {
+      UserCredential userCredential =
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
 
+      User? user = userCredential.user;
+
+      await user!.reload(); // refresh
+      user = FirebaseAuth.instance.currentUser;
+
+      if (!user!.emailVerified) {
+        print("❌ Please verify your email first");
+        return;
+      }
+
+      print("✅ Email verified — login success");
+
+      // ✅ SEND DATA TO BACKEND
+      final url = Uri.parse("http://localhost:3000/users/signup");
+
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "firebase_uid": user.uid,
+          "email": user.email,
+          "name": "Krish",
+          "phone": "1234567890",
+          "course": "flutter",
+          "password": "firebase_managed"
+        }),
+      );
+
+      print("STATUS: ${response.statusCode}");
+      print("BODY: ${response.body}");
+
+    } catch (e) {
+      print("❌ Login error: $e");
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

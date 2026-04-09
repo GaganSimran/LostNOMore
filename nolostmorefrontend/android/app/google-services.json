@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "408123002263",
+    "project_id": "lostnomore-403b4",
+    "storage_bucket": "lostnomore-403b4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:408123002263:android:148ce26d78178303bc88d2",
+        "android_client_info": {
+          "package_name": "com.example.nolostmorefrontend"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC9tcpR1lUrNb9WGarxmw5Aqe93iEHiek0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
