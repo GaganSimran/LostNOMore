@@ -4,7 +4,7 @@ import 'signup_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'package:nolostmorefrontend/LoginScreens/home_screen.dart';
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       User? user = userCredential.user;
 
-      await user!.reload(); // refresh
+      await user!.reload();
       user = FirebaseAuth.instance.currentUser;
 
       if (!user!.emailVerified) {
@@ -46,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
         body: jsonEncode({
           "firebase_uid": user.uid,
           "email": user.email,
-          "name": "Krish",
+          "name": "Krish", // later dynamic
           "phone": "1234567890",
           "course": "flutter",
           "password": "firebase_managed"
@@ -56,8 +56,20 @@ class _LoginScreenState extends State<LoginScreen> {
       print("STATUS: ${response.statusCode}");
       print("BODY: ${response.body}");
 
+      // ✅ NAVIGATE TO HOME SCREEN
+      if (response.statusCode == 201 || response.statusCode == 400) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(
+              username: user!.email!.split('@')[0], // simple username
+            ),
+          ),
+        );
+      }
+
     } catch (e) {
-      print("❌ Login error: $e");
+      print("❌ Login error: ${e.toString()}");
     }
   }
   @override

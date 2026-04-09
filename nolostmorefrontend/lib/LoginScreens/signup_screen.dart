@@ -49,7 +49,12 @@ class _SignupScreenState extends State<SignupScreen> {
       print("📩 Verification email sent!");
 
     } catch (e) {
-      print("❌ ERROR: $e");
+      if (e is FirebaseAuthException) {
+        print("❌ Firebase Error Code: ${e.code}");
+        print("❌ Firebase Message: ${e.message}");
+      } else {
+        print("❌ Unknown Error: $e");
+      }
     }
   }
   @override
