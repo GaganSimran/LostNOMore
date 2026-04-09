@@ -3,6 +3,7 @@ import 'search_screen.dart';
 import 'lost_screen.dart';
 import 'found_screen.dart';
 import 'notification_screen.dart'; // ✅ Import your notification screen
+import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final String username;
@@ -22,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
     const SearchScreen(),
     const SizedBox(), // Post handled manually
     NotificationScreen(username: widget.username), // Notification Screen
+    SettingsScreen(username: widget.username, bio: "This is your bio"),
     const Center(child: Text("Settings Screen")), // Placeholder
   ];
 
