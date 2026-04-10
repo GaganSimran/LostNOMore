@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'search_screen.dart';
 import 'lost_screen.dart';
 import 'found_screen.dart';
-import 'notification_screen.dart'; // ✅ Import your notification screen
+import 'notification_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,20 +17,20 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  // Screens for Bottom Navigation (except Post which opens manually)
   late final List<Widget> _screens = [
-    const SizedBox(), // Home handled separately
+    _homeContent(),
     const SearchScreen(),
-    const SizedBox(), // Post handled manually
-    NotificationScreen(username: widget.username), // Notification Screen
-    SettingsScreen(username: widget.username, bio: "This is your bio"),
-    const Center(child: Text("Settings Screen")), // Placeholder
+    const SizedBox(), // handled manually
+    NotificationScreen(username: widget.username),
+    SettingsScreen(username: widget.username),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _selectedIndex == 0 ? _homeContent() : _screens[_selectedIndex],
+      body: _selectedIndex == 2
+          ? const SizedBox() // empty because handled via push
+          : _screens[_selectedIndex],
 
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
@@ -43,13 +43,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
         onTap: (index) {
           if (index == 2) {
-            // ➕ opens Lost Screen
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const LostScreen()),
+              MaterialPageRoute(builder: (_) => const LostScreen()),
             );
           } else {
-            setState(() => _selectedIndex = index);
+            setState(() {
+              _selectedIndex = index;
+            });
           }
         },
 
@@ -64,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // 🏠 HOME CONTENT
+  // HOME UI (UNCHANGED)
   Widget _homeContent() {
     return SafeArea(
       child: SingleChildScrollView(
@@ -105,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     question: "Found something?",
                     label: "Found",
                     color: Colors.green[800]!,
-                    navigateTo:  FoundScreen(),
+                    navigateTo: const FoundScreen(),
                   ),
                 ],
               ),
@@ -116,7 +117,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // 🔘 BUTTON BUILDER
   Widget _buildActionButton(
       BuildContext context, {
         required String question,
@@ -135,14 +135,19 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(height: 8),
         ElevatedButton(
           onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => navigateTo));
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => navigateTo),
+            );
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: color,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8)),
             padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
           ),
-          child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 16)),
+          child: Text(label,
+              style: const TextStyle(color: Colors.white, fontSize: 16)),
         ),
       ],
     );

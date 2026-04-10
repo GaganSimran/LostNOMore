@@ -133,20 +133,7 @@ class LostScreen extends StatelessWidget {
       ),
 
       // BOTTOM NAV
-      bottomNavigationBar: Container(
-        color: Colors.blue[900],
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Icon(Icons.home, color: Colors.white),
-            Icon(Icons.search, color: Colors.white),
-            Icon(Icons.add_box, color: Colors.white),
-            Icon(Icons.notifications, color: Colors.white),
-            Icon(Icons.settings, color: Colors.white),
-          ],
-        ),
-      ),
+
     );
   }
 
