@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ForgetPasswordScreen extends StatefulWidget {
   @override
@@ -8,24 +9,76 @@ class ForgetPasswordScreen extends StatefulWidget {
 class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
   final TextEditingController emailController = TextEditingController();
 
-  void handleResetPassword() {
+  void handleResetPassword() async {
     String email = emailController.text.trim();
 
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please enter your email")),
+        SnackBar(
+          content: Text("Please enter your email"),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
 
-    // Simple test action
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Reset link sent to $email (test mode)"),
-      ),
-    );
+    try {
+      // ✅ SEND RESET EMAIL FROM FIREBASE
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
 
-    print("Reset password requested for: $email");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Reset link sent to $email"),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      print("✅ Reset email sent to: $email");
+
+      // ✅ GO BACK TO LOGIN SCREEN AFTER 2 SEC
+      Future.delayed(Duration(seconds: 2), () {
+        Navigator.pop(context);
+      });
+
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("No user found with this email"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else if (e.code == 'invalid-email') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Invalid email format"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error: ${e.message}"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Something went wrong"),
+          backgroundColor: Colors.red,
+        ),
+      );
+
+      print("❌ ERROR: $e");
+    }
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    super.dispose();
   }
 
   @override
@@ -60,7 +113,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
             SizedBox(height: 10),
 
             Text(
-              "Enter your email and we’ll send you a reset link.",
+              "Enter your registered email and we’ll send you a reset link.",
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey),
             ),
