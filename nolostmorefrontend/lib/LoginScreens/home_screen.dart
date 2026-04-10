@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'search_screen.dart';
 import 'lost_screen.dart';
 import 'found_screen.dart';
+import 'notification_screen.dart'; // ✅ Import your notification screen
+import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final String username;
@@ -15,19 +17,21 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  // Screens for Bottom Navigation
-  final List<Widget> _screens = [
-    Placeholder(), // Home content (we override in body)
+  // Screens for Bottom Navigation (except Post which opens manually)
+  late final List<Widget> _screens = [
+    const SizedBox(), // Home handled separately
     const SearchScreen(),
-    Placeholder(), // Post screen
-    Placeholder(), // Notifications screen
-    Placeholder(), // Settings screen
+    const SizedBox(), // Post handled manually
+    NotificationScreen(username: widget.username), // Notification Screen
+    SettingsScreen(username: widget.username, bio: "This is your bio"),
+    const Center(child: Text("Settings Screen")), // Placeholder
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: _selectedIndex == 0 ? _homeContent() : _screens[_selectedIndex],
+
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.blue[900],
@@ -36,7 +40,19 @@ class _HomeScreenState extends State<HomeScreen> {
         showSelectedLabels: false,
         showUnselectedLabels: false,
         currentIndex: _selectedIndex,
-        onTap: (index) => setState(() => _selectedIndex = index),
+
+        onTap: (index) {
+          if (index == 2) {
+            // ➕ opens Lost Screen
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const LostScreen()),
+            );
+          } else {
+            setState(() => _selectedIndex = index);
+          }
+        },
+
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
@@ -48,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // 🏠 HOME CONTENT
   Widget _homeContent() {
     return SafeArea(
       child: SingleChildScrollView(
@@ -55,7 +72,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Greeting
             Text(
               "Hello, ${widget.username}",
               style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
@@ -67,7 +83,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const Divider(height: 30),
 
-            // Grey Box containing Lost / Found buttons
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
@@ -82,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     question: "Missing something?",
                     label: "Lost",
                     color: Colors.red[900]!,
-                    navigateTo:  LostScreen(),
+                    navigateTo: const LostScreen(),
                   ),
                   const SizedBox(height: 20),
                   _buildActionButton(
@@ -101,38 +116,33 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildActionButton(BuildContext context,
-      {required String question,
+  // 🔘 BUTTON BUILDER
+  Widget _buildActionButton(
+      BuildContext context, {
+        required String question,
         required String label,
         required Color color,
-        required Widget navigateTo}) {
+        required Widget navigateTo,
+      }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           question,
-          style: const TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 16,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
         ElevatedButton(
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => navigateTo),
-            );
+            Navigator.push(context, MaterialPageRoute(builder: (context) => navigateTo));
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: color,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
           ),
-          child: Text(label,
-              style: const TextStyle(color: Colors.white, fontSize: 16)),
+          child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 16)),
         ),
       ],
     );
