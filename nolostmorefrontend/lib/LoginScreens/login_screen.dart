@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:nolostmorefrontend/LoginScreens/home_screen.dart';
+
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -19,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void handleLogin() async {
     try {
+      // 🔐 Firebase Login
       UserCredential userCredential =
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailController.text.trim(),
@@ -37,41 +39,42 @@ class _LoginScreenState extends State<LoginScreen> {
 
       print("✅ Email verified — login success");
 
-      // ✅ SEND DATA TO BACKEND
-      final url = Uri.parse("http://192.168.2.27:3000/users/signup");
+      // ✅ CALL LOGIN API (NOT SIGNUP)
+      final url = Uri.parse("http://192.168.2.27:3000/users/login");
 
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
-          "firebase_uid": user.uid,
           "email": user.email,
-          "name": "Krish", // later dynamic
-          "phone": "1234567890",
-          "course": "flutter",
-          "password": "firebase_managed"
         }),
       );
 
       print("STATUS: ${response.statusCode}");
       print("BODY: ${response.body}");
 
-      // ✅ NAVIGATE TO HOME SCREEN
-      if (response.statusCode == 201 || response.statusCode == 400) {
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        final name = data['name']; // ✅ REAL NAME FROM DB
+
+        // ✅ NAVIGATE WITH REAL NAME
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => HomeScreen(
-              username: user!.email!.split('@')[0], // simple username
+              username: name,
             ),
           ),
         );
+      } else {
+        print("❌ User not found in DB");
       }
-
     } catch (e) {
       print("❌ Login error: ${e.toString()}");
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,7 +86,6 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 SizedBox(height: 40),
 
-                // 🖼️ LOGO IMAGE
                 Image.asset(
                   "assets/logo.png",
                   height: 250,
@@ -102,7 +104,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 SizedBox(height: 40),
 
-                // EMAIL
                 TextField(
                   controller: emailController,
                   decoration: InputDecoration(
@@ -113,11 +114,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 SizedBox(height: 20),
 
-                // PASSWORD (BIGGER DOTS)
                 TextField(
                   controller: passwordController,
                   obscureText: isPasswordHidden,
-                  obscuringCharacter: '●', // bigger dot
+                  obscuringCharacter: '●',
                   style: TextStyle(fontSize: 18),
                   decoration: InputDecoration(
                     prefixIcon: Icon(Icons.lock_outline),
@@ -139,7 +139,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 SizedBox(height: 10),
 
-                // REMEMBER + FORGOT
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -156,8 +155,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         Text("Remember me"),
                       ],
                     ),
-
-                    // FORGOT PASSWORD (NO UNDERLINE)
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -169,9 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       child: Text(
                         "Forgot password?",
-                        style: TextStyle(
-                          color: Colors.blue,
-                        ),
+                        style: TextStyle(color: Colors.blue),
                       ),
                     ),
                   ],
@@ -179,7 +174,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 SizedBox(height: 20),
 
-                // LOGIN BUTTON (WHITE TEXT)
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -190,17 +184,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     child: Text(
                       "Login",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
+                      style: TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ),
                 ),
 
                 SizedBox(height: 15),
 
-                // SIGNUP (CLICKABLE)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
