@@ -21,6 +21,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
+  late Future<List> itemsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    itemsFuture = fetchItems();
+  }
+
   Future<List> fetchItems() async {
     final res = await http.get(
       Uri.parse("http://192.168.2.27:3000/items"),
@@ -30,6 +38,12 @@ class _HomeScreenState extends State<HomeScreen> {
     print("FETCH BODY: ${res.body}");
 
     return jsonDecode(res.body);
+  }
+
+  void refreshItems() {
+    setState(() {
+      itemsFuture = fetchItems();
+    });
   }
 
   late final List<Widget> _screens = [
@@ -62,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
               context,
               MaterialPageRoute(builder: (_) => const LostScreen()),
             ).then((_) {
-              setState(() {}); // refresh after submit
+              refreshItems();
             });
           } else {
             setState(() {
@@ -85,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _homeContent() {
     return SafeArea(
       child: FutureBuilder(
-        future: fetchItems(),
+        future: itemsFuture,
         builder: (context, snapshot) {
 
           if (!snapshot.hasData) {
@@ -161,14 +175,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisCount: 2,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
-                    childAspectRatio: 0.8,
+                    childAspectRatio: 1.3,
                   ),
                   itemBuilder: (context, index) {
                     final item = items[index];
 
-                    final hasImage = item['image_url'] != null &&
-                        item['image_url'].toString().isNotEmpty &&
-                        item['image_url'].toString().startsWith("http");
+                    final imageUrl = item['image_url'] ?? "";
+
+                    final hasImage = imageUrl.isNotEmpty &&
+                        imageUrl.toString().startsWith("http");
 
                     return GestureDetector(
                       onTap: () {
@@ -191,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               borderRadius: BorderRadius.circular(10),
                               image: hasImage
                                   ? DecorationImage(
-                                image: NetworkImage(item['image_url']),
+                                image: NetworkImage(imageUrl),
                                 fit: BoxFit.cover,
                               )
                                   : null,

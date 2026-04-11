@@ -1,43 +1,184 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class SearchScreen extends StatelessWidget {
+import 'item_detail_screen.dart';
+
+class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
+
+  @override
+  State<SearchScreen> createState() => _SearchScreenState();
+}
+
+class _SearchScreenState extends State<SearchScreen> {
+
+  late Future<List> itemsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    itemsFuture = fetchItems();
+  }
+
+  Future<List> fetchItems() async {
+    final res = await http.get(
+      Uri.parse("http://192.168.2.27:3000/items"),
+    );
+
+    return jsonDecode(res.body);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
               const SizedBox(height: 10),
               _buildHeader(),
+
               const SizedBox(height: 25),
+
               const Text(
                 "Find By Categories",
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              const Text("Easy finds with categories", style: TextStyle(color: Colors.grey)),
+
+              const Text(
+                "Easy finds with categories",
+                style: TextStyle(color: Colors.grey),
+              ),
+
               const Divider(),
+
               const SizedBox(height: 15),
+
               _buildCategoryGrid(),
+
               const SizedBox(height: 30),
+
               const Text(
                 "Posts",
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
+
               const SizedBox(height: 15),
+
               _buildTimeFilters(),
+
               const SizedBox(height: 20),
-              _buildPostList(),
+
+              // 🔥 REAL POSTS FROM BACKEND
+              FutureBuilder(
+                future: itemsFuture,
+                builder: (context, snapshot) {
+
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final items = snapshot.data as List;
+
+                  return Column(
+                    children: items.map((item) {
+
+                      final imageUrl = item['image_url'] ?? "";
+
+                      final hasImage = imageUrl.isNotEmpty &&
+                          imageUrl.toString().startsWith("http");
+
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ItemDetailScreen(item: item),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 15),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+
+                              // IMAGE
+                              Container(
+                                height: 100,
+                                width: 100,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: Colors.grey[300],
+                                  image: hasImage
+                                      ? DecorationImage(
+                                    image: NetworkImage(imageUrl),
+                                    fit: BoxFit.cover,
+                                  )
+                                      : null,
+                                ),
+                                child: !hasImage
+                                    ? const Icon(Icons.image)
+                                    : null,
+                              ),
+
+                              const SizedBox(width: 15),
+
+                              // TEXT
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+
+                                    Text(
+                                      item['title'] ?? "",
+                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "Status: ${item['status'] ?? "pending"}",
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Icon(
+                                          item['status'] == "approved"
+                                              ? Icons.check_box
+                                              : Icons.info_outline,
+                                          size: 14,
+                                          color: item['status'] == "approved"
+                                              ? Colors.green
+                                              : Colors.red,
+                                        ),
+                                      ],
+                                    ),
+
+                                    Text(
+                                      "Item ID: ${item['item_code'] ?? ""}",
+                                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
             ],
           ),
         ),
       ),
-      //bottomNavigationBar: _buildBottomNav(),
     );
   }
 
@@ -100,7 +241,10 @@ class SearchScreen extends StatelessWidget {
               const SizedBox(width: 10),
               Text(
                 categories[index]['name'] as String,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16),
               ),
             ],
           ),
@@ -120,65 +264,12 @@ class SearchScreen extends StatelessWidget {
             color: Colors.black,
             borderRadius: BorderRadius.circular(5),
           ),
-          child: Text(filter, style: const TextStyle(color: Colors.white, fontSize: 12)),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildPostList() {
-    final posts = [
-      {"title": "Set of keys", "status": "Pending", "time": "3 hr ago", "color": Colors.red},
-      {"title": "Wallet", "status": "Given to Security", "time": "2 hr ago", "color": Colors.green},
-    ];
-
-    return Column(
-      children: posts.map((post) {
-        final Color statusColor = post["color"] as Color;
-
-        return Container(
-          margin: const EdgeInsets.only(bottom: 15),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                height: 100,
-                width: 100,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  image: const DecorationImage(
-                    image: NetworkImage('https://via.placeholder.com/150'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 15),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(post["title"] as String, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    Row(
-                      children: [
-                        Text("Status: ${post["status"] as String}", style: const TextStyle(fontSize: 12)),
-                        const SizedBox(width: 5),
-                        Icon(
-                          statusColor == Colors.green ? Icons.check_box : Icons.info_outline,
-                          size: 14,
-                          color: statusColor,
-                        ),
-                      ],
-                    ),
-                    Text("Posted ${post["time"] as String}", style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                  ],
-                ),
-              ),
-            ],
+          child: Text(
+            filter,
+            style: const TextStyle(color: Colors.white, fontSize: 12),
           ),
         );
       }).toList(),
     );
   }
-
-
 }
