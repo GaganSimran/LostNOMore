@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 
+import 'notification_service.dart';
+
 class LostScreen extends StatefulWidget {
   const LostScreen({super.key});
 
@@ -50,8 +52,6 @@ class _LostScreenState extends State<LostScreen> {
     var response = await request.send();
     var res = await http.Response.fromStream(response);
 
-    print("CLOUDINARY RESPONSE: ${res.body}");
-
     final data = jsonDecode(res.body);
     return data['secure_url'] ?? "";
   }
@@ -59,14 +59,14 @@ class _LostScreenState extends State<LostScreen> {
   Future<void> submitItem() async {
     final imageUrl = await uploadToCloudinary();
 
-    print("IMAGE URL: $imageUrl");
+    final itemCode = "ITEM${DateTime.now().millisecondsSinceEpoch}";
 
     final response = await http.post(
       Uri.parse("http://192.168.2.27:3000/items"),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
         "user_id": 1,
-        "item_code": "ITEM${DateTime.now().millisecondsSinceEpoch}",
+        "item_code": itemCode,
         "title": titleController.text,
         "description": descController.text,
         "category": selectedCategory,
@@ -76,10 +76,13 @@ class _LostScreenState extends State<LostScreen> {
       }),
     );
 
-    print("ITEM STATUS: ${response.statusCode}");
-    print("ITEM BODY: ${response.body}");
-
     if (response.statusCode == 200 || response.statusCode == 201) {
+
+
+      NotificationService.addNotification(
+          "Hey ${"Krish"}, your item has been posted successfully.\nItem ID: $itemCode"
+      );
+
       Navigator.pop(context);
     }
   }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'notification_service.dart';
 class NotificationScreen extends StatefulWidget {
   final String username;
 
@@ -10,15 +10,13 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  int _selectedBottomIndex = 3; // Notifications tab
-  String _selectedFilter = 'Last 24 hours'; // Default selected filter
+  String _selectedFilter = 'Last 24 hours';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      // APP BAR
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -33,7 +31,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
           decoration: InputDecoration(
             hintText: 'Search',
             prefixIcon: const Icon(Icons.search),
-            contentPadding: const EdgeInsets.symmetric(vertical: 0),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide.none,
@@ -44,10 +41,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
         ),
       ),
 
-      // BODY
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+
           const Padding(
             padding: EdgeInsets.all(16.0),
             child: Text(
@@ -56,7 +53,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
             ),
           ),
 
-          // FILTER CHIPS AS BUTTONS
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -71,32 +67,31 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
           const SizedBox(height: 16),
 
-          // NOTIFICATION LIST
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
+              children: NotificationService.getNotifications().isEmpty
+                  ? [
                 _buildNotificationTile(
-                    'Most commonly reported items on campus. Tap to view list.',
-                    '1 hr',
-                    Icons.list_alt),
-                _buildNotificationTile(
-                    'Found a set of car keys in parking lot B.', '2 hr', Icons.vpn_key),
-                _buildNotificationTile(
-                    'Lost calculator after math lecture.', '3 hr', Icons.calculate),
-                _buildNotificationTile(
-                    'Found AirPods near basketball court.', '5 hr', Icons.earbuds),
-              ],
+                  'No notifications yet',
+                  '',
+                  Icons.notifications_none,
+                )
+              ]
+                  : NotificationService.getNotifications().map((notif) {
+                return _buildNotificationTile(
+                  notif["text"]!,
+                  notif["time"]!,
+                  Icons.notifications,
+                );
+              }).toList(),
             ),
           ),
         ],
       ),
-
-
     );
   }
 
-  // FILTER CHIP BUILDER
   Widget _buildFilterChip(String label) {
     final bool isSelected = _selectedFilter == label;
     return GestureDetector(
@@ -121,7 +116,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
   }
 
-  // NOTIFICATION TILE BUILDER
   Widget _buildNotificationTile(String text, String time, IconData icon) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
