@@ -62,5 +62,27 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// UPDATE USER PROFILE
+router.put('/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, bio, profile_image } = req.body;
 
+    const updatedUser = await pool.query(
+      `UPDATE users
+       SET name = $1,
+           bio = $2,
+           profile_image = $3
+       WHERE id = $4
+       RETURNING *`,
+      [name, bio, profile_image, id]
+    );
+
+    res.json(updatedUser.rows[0]);
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
 module.exports = router;
