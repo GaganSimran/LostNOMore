@@ -1,11 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:nolostmorefrontend/LoginScreens/login_screen.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'firebase_options.dart';
+import 'LoginScreens/settings_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,16 +16,36 @@ void main() async {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  double brightness = 1.0;
+  bool isDarkMode = false;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'No Lost More',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+
+      theme: isDarkMode ? ThemeData.dark() : ThemeData.light(),
+
+      home: Stack(
+        children: [
+          LoginScreen(),
+
+          // 🔥 GLOBAL BRIGHTNESS OVERLAY
+          IgnorePointer(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              color: Colors.black.withOpacity(1 - brightness),
+            ),
+          ),
+        ],
       ),
-      home: LoginScreen(),
     );
   }
 }

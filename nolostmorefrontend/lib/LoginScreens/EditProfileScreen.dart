@@ -77,8 +77,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       }),
     );
 
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
     if (response.statusCode == 200) {
-      Navigator.pop(context, true);
+      Navigator.pop(context, {
+        "name": nameController.text,
+        "bio": bioController.text,
+        "image": imageUrl,
+      });
+    } else {
+      print("FAILED TO UPDATE");
     }
   }
 

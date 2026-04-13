@@ -23,6 +23,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   late Future<List> itemsFuture;
 
+  double _brightness = 1.0;
+  bool _isDarkMode = false;
+
   @override
   void initState() {
     super.initState();
@@ -46,53 +49,79 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  late final List<Widget> _screens = [
-    _homeContent(),
-    const SearchScreen(),
-    const SizedBox(),
-    NotificationScreen(username: widget.username),
-    SettingsScreen(username: widget.username),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _selectedIndex == 2
-          ? const SizedBox()
-          : _screens[_selectedIndex],
-
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.blue[900],
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white70,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        currentIndex: _selectedIndex,
-
-        onTap: (index) {
-          if (index == 2) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const LostScreen()),
-            ).then((_) {
-              refreshItems();
-            });
-          } else {
-            setState(() {
-              _selectedIndex = index;
-            });
-          }
+    final screens = [
+      _homeContent(),
+      const SearchScreen(),
+      const SizedBox(),
+      NotificationScreen(username: widget.username),
+      SettingsScreen(
+        username: widget.username,
+        brightness: _brightness,
+        isDarkMode: _isDarkMode,
+        onBrightnessChanged: (val) {
+          setState(() => _brightness = val);
         },
-
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
-          BottomNavigationBarItem(icon: Icon(Icons.add_box_outlined), label: "Post"),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications_none), label: "Notifications"),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Settings"),
-        ],
+        onThemeChanged: (val) {
+          setState(() => _isDarkMode = val);
+        },
       ),
+    ];
+
+    return Stack(
+      children: [
+        Theme(
+          data: _isDarkMode ? ThemeData.dark() : ThemeData.light(),
+          child: Scaffold(
+            body: _selectedIndex == 2
+                ? const SizedBox()
+                : screens[_selectedIndex],
+
+            bottomNavigationBar: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              backgroundColor: Colors.blue[900],
+              selectedItemColor: Colors.white,
+              unselectedItemColor: Colors.white70,
+              showSelectedLabels: false,
+              showUnselectedLabels: false,
+              currentIndex: _selectedIndex,
+
+              onTap: (index) {
+                if (index == 2) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LostScreen()),
+                  ).then((_) {
+                    refreshItems();
+                  });
+                } else {
+                  setState(() {
+                    _selectedIndex = index;
+                  });
+                }
+              },
+
+              items: const [
+                BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+                BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
+                BottomNavigationBarItem(icon: Icon(Icons.add_box_outlined), label: "Post"),
+                BottomNavigationBarItem(icon: Icon(Icons.notifications_none), label: "Notifications"),
+                BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Settings"),
+              ],
+            ),
+          ),
+        ),
+
+        // 🔥 SMOOTH BRIGHTNESS (FIXED)
+        IgnorePointer(
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 100),
+            opacity: 1 - _brightness,
+            child: Container(color: Colors.black),
+          ),
+        ),
+      ],
     );
   }
 
@@ -128,7 +157,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 const Divider(height: 30),
 
-                // LOST / FOUND BOX
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
@@ -181,7 +209,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     final item = items[index];
 
                     final imageUrl = item['image_url'] ?? "";
-
                     final hasImage = imageUrl.isNotEmpty &&
                         imageUrl.toString().startsWith("http");
 

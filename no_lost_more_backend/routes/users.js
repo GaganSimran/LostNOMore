@@ -63,7 +63,7 @@ router.post('/login', async (req, res) => {
   }
 });
 // UPDATE USER PROFILE
-router.put('/users/:id', async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { name, bio, profile_image } = req.body;

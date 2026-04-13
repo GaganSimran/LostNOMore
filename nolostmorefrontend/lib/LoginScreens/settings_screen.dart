@@ -5,204 +5,24 @@ class SettingsScreen extends StatefulWidget {
   final String username;
   final String bio;
 
+  // 🔥 ADDED (for global control)
+  final double brightness;
+  final bool isDarkMode;
+  final Function(double) onBrightnessChanged;
+  final Function(bool) onThemeChanged;
+
   const SettingsScreen({
     super.key,
     required this.username,
+    required this.brightness,
+    required this.isDarkMode,
+    required this.onBrightnessChanged,
+    required this.onThemeChanged,
     this.bio = '"Certified Oops, I dropped it specialist."',
   });
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
-}
-
-class _SettingsScreenState extends State<SettingsScreen> {
-  double _volume = 0.5;
-  double _brightness = 0.5;
-  bool _isDarkMode = false;
-
-  String profileImage = ""; // you can load from backend later
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          'Settings',
-          style: TextStyle(
-              color: Colors.black,
-              fontSize: 28,
-              fontWeight: FontWeight.bold),
-        ),
-      ),
-
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-
-          // ================= PROFILE =================
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 35,
-                backgroundImage: profileImage.isNotEmpty
-                    ? NetworkImage(profileImage)
-                    : const NetworkImage('https://via.placeholder.com/150'),
-              ),
-
-              const SizedBox(width: 16),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(widget.username,
-                        style: const TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.w500)),
-
-                    Text(widget.bio,
-                        style: const TextStyle(
-                            color: Colors.orange, fontSize: 12)),
-
-                    TextButton(
-                      onPressed: () async {
-                        final updated = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => EditProfileScreen(
-                              userId: 1,
-                              currentName: widget.username,
-                              currentBio: widget.bio,
-                              currentImage: profileImage,
-                            ),
-                          ),
-                        );
-
-                        if (updated == true) {
-                          setState(() {});
-                        }
-                      },
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: const Size(0, 0),
-                      ),
-                      child: const Text(
-                        'Edit profile',
-                        style: TextStyle(color: Colors.blue, fontSize: 12),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          const Divider(height: 30),
-
-          // ================= APPEARANCE =================
-          const SectionHeader(title: 'APPEARANCE'),
-
-          GroupedContainer(
-            child: Column(
-              children: [
-                SliderRow(
-                  icon: Icons.volume_down,
-                  iconRight: Icons.volume_up,
-                  value: _volume,
-                  onChanged: (v) => setState(() => _volume = v),
-                ),
-
-                const Divider(),
-
-                SliderRow(
-                  icon: Icons.wb_sunny_outlined,
-                  iconRight: Icons.wb_sunny,
-                  value: _brightness,
-                  onChanged: (v) => setState(() => _brightness = v),
-                ),
-
-                const Divider(),
-
-                SwitchListTile(
-                  title: const Text('Dark Mode'),
-                  value: _isDarkMode,
-                  onChanged: (v) => setState(() => _isDarkMode = v),
-                  activeColor: Colors.blue,
-                ),
-
-                const Divider(),
-
-                ListTile(
-                  title: const Text('Color Theme'),
-                  trailing: const Text('Light >',
-                      style: TextStyle(color: Colors.blue)),
-                  onTap: () {},
-                ),
-              ],
-            ),
-          ),
-
-          // ================= SYSTEM =================
-          const SectionHeader(title: 'SYSTEM'),
-
-          GroupedContainer(
-            child: Column(
-              children: [
-                SimpleListTile(
-                    title: 'Clear Search History', color: Colors.blue),
-
-                const Divider(),
-
-                SimpleListTile(
-                    title: 'Clear Cache', color: Colors.blue),
-
-                const Divider(),
-
-                SimpleListTile(
-                    title: 'Delete Account', color: Colors.red),
-              ],
-            ),
-          ),
-
-          // ================= CONTACT =================
-          const SectionHeader(title: 'CONTACT ME'),
-
-          GroupedContainer(
-            child: Column(
-              children: [
-                IconListTile(
-                    icon: Icons.lightbulb_outline,
-                    title: 'Suggest New Feature'),
-
-                const Divider(),
-
-                IconListTile(
-                    icon: Icons.bug_report_outlined,
-                    title: 'Report a bug'),
-
-                const Divider(),
-
-                IconListTile(
-                    icon: Icons.info_outline,
-                    title: 'About us'),
-
-                const Divider(),
-
-                IconListTile(
-                    icon: Icons.chat_bubble_outline,
-                    title: 'Report Issues'),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 80),
-        ],
-      ),
-    );
-  }
 }
 
 //
@@ -323,12 +143,215 @@ class IconListTile extends StatelessWidget {
     return ListTile(
       dense: true,
       leading: Icon(icon, color: Colors.blue[800], size: 20),
-      title: const Text(
-        "",
-        style: TextStyle(color: Colors.grey),
-      ),
+      title: const Text(""),
       subtitle: Text(title),
       onTap: () {},
+    );
+  }
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  double _volume = 0.5;
+
+  String profileImage = "";
+
+  late String username;
+  late String bio;
+
+  @override
+  void initState() {
+    super.initState();
+    username = widget.username;
+    bio = widget.bio;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(
+          'Settings',
+          style: TextStyle(
+              color: Colors.black,
+              fontSize: 28,
+              fontWeight: FontWeight.bold),
+        ),
+      ),
+
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+
+          // ================= PROFILE =================
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 35,
+                backgroundImage: profileImage.isNotEmpty
+                    ? NetworkImage(profileImage)
+                    : const NetworkImage('https://i.pravatar.cc/150'),
+              ),
+
+              const SizedBox(width: 16),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+
+                    Text(username,
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.w500)),
+
+                    Text(bio,
+                        style: const TextStyle(
+                            color: Colors.orange, fontSize: 12)),
+
+                    TextButton(
+                      onPressed: () async {
+                        final updated = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => EditProfileScreen(
+                              userId: 1,
+                              currentName: username,
+                              currentBio: bio,
+                              currentImage: profileImage,
+                            ),
+                          ),
+                        );
+
+                        if (updated != null) {
+                          setState(() {
+                            username = updated["name"] ?? username;
+                            bio = updated["bio"] ?? bio;
+                            profileImage =
+                                updated["image"] ?? profileImage;
+                          });
+                        }
+                      },
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(0, 0),
+                      ),
+                      child: const Text(
+                        'Edit profile',
+                        style: TextStyle(color: Colors.blue, fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const Divider(height: 30),
+
+          // ================= APPEARANCE =================
+          const SectionHeader(title: 'APPEARANCE'),
+
+          GroupedContainer(
+            child: Column(
+              children: [
+                SliderRow(
+                  icon: Icons.volume_down,
+                  iconRight: Icons.volume_up,
+                  value: _volume,
+                  onChanged: (v) => setState(() => _volume = v),
+                ),
+
+                const Divider(),
+
+                //BRIGHTNESS (CONNECTED TO GLOBAL)
+                SliderRow(
+                  icon: Icons.wb_sunny_outlined,
+                  iconRight: Icons.wb_sunny,
+                  value: widget.brightness,
+                  onChanged: widget.onBrightnessChanged,
+                ),
+
+                const Divider(),
+
+                //DARK MODE (CONNECTED TO GLOBAL)
+                SwitchListTile(
+                  title: const Text('Dark Mode'),
+                  value: widget.isDarkMode,
+                  onChanged: widget.onThemeChanged,
+                  activeColor: Colors.blue,
+                ),
+
+                const Divider(),
+
+                ListTile(
+                  title: const Text('Color Theme'),
+                  trailing: const Text('Light >',
+                      style: TextStyle(color: Colors.blue)),
+                  onTap: () {},
+                ),
+              ],
+            ),
+          ),
+
+          // ================= SYSTEM =================
+          const SectionHeader(title: 'SYSTEM'),
+
+          GroupedContainer(
+            child: Column(
+              children: [
+                SimpleListTile(
+                    title: 'Clear Search History', color: Colors.blue),
+
+                const Divider(),
+
+                SimpleListTile(
+                    title: 'Clear Cache', color: Colors.blue),
+
+                const Divider(),
+
+                SimpleListTile(
+                    title: 'Delete Account', color: Colors.red),
+              ],
+            ),
+          ),
+
+          // ================= CONTACT =================
+          const SectionHeader(title: 'CONTACT ME'),
+
+          GroupedContainer(
+            child: Column(
+              children: [
+                IconListTile(
+                    icon: Icons.lightbulb_outline,
+                    title: 'Suggest New Feature'),
+
+                const Divider(),
+
+                IconListTile(
+                    icon: Icons.bug_report_outlined,
+                    title: 'Report a bug'),
+
+                const Divider(),
+
+                IconListTile(
+                    icon: Icons.info_outline,
+                    title: 'About us'),
+
+                const Divider(),
+
+                IconListTile(
+                    icon: Icons.chat_bubble_outline,
+                    title: 'Report Issues'),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 80),
+        ],
+      ),
     );
   }
 }
