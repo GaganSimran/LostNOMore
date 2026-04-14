@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'forget_password_screen.dart';
 import 'signup_screen.dart';
-
+import 'admin_panel_screen.dart';
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
