@@ -102,28 +102,28 @@ class AdminPanelScreen extends StatelessWidget {
                     children: [
                       SummaryCard(
                         label: 'Total Lost Items',
-                        count: '120',
+                        count: '25',
                         icon: Icons.search,
                         color: Colors.grey,
                       ),
                       SizedBox(width: 12),
                       SummaryCard(
                         label: 'Total Found Items',
-                        count: '98',
+                        count: '6',
                         icon: Icons.check_circle,
                         color: Colors.green,
                       ),
                       SizedBox(width: 12),
                       SummaryCard(
                         label: 'Returned to Security',
-                        count: '15',
+                        count: '5',
                         icon: Icons.shield,
                         color: Colors.blueGrey,
                       ),
                       SizedBox(width: 12),
                       SummaryCard(
                         label: 'Pending Items',
-                        count: '24',
+                        count: '2,
                         icon: Icons.hourglass_empty,
                         color: Colors.brown,
                       ),

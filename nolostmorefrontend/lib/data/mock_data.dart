@@ -1,6 +1,6 @@
 import '../models/post.dart';
 
-const List<Post> mockPosts = [
+final List<Post> mockPosts = [
   Post(
     id: '001',
     itemName: 'Wallet',
