@@ -12,6 +12,8 @@ app.use('/items', require('./routes/items'));
 app.use('/reports', require('./routes/reports'));
 app.use('/notifications', require('./routes/notifications'));
 
-app.listen(3000, '0.0.0.0', () => {
-  console.log("🚀 Server running on port 3000");
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });
