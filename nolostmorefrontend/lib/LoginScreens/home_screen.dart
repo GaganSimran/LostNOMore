@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   double _brightness = 1.0;
   bool _isDarkMode = false;
 
-  // 🔥 NEW STATE (IMPORTANT)
+  // NEW STATE (IMPORTANT)
   late String _profileImage;
   late String _username;
   late String _bio;
@@ -45,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     itemsFuture = fetchItems();
 
-    // 🔥 INIT STATE
+    // INIT STATE
     _profileImage = widget.profileImage;
     _username = widget.username;
     _bio = widget.bio;
@@ -72,11 +72,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final screens = [
       _homeContent(),
-      const SearchScreen(),
+      SearchScreen(profileImage: _profileImage),
       const SizedBox(),
-      NotificationScreen(username: _username),
+      NotificationScreen(username: _username,profileImage: _profileImage,),
 
-      // 🔥 UPDATED SETTINGS SCREEN
+
+      //  UPDATED SETTINGS SCREEN
       SettingsScreen(
         username: _username,
         brightness: _brightness,
@@ -90,8 +91,6 @@ class _HomeScreenState extends State<HomeScreen> {
         onThemeChanged: (val) {
           setState(() => _isDarkMode = val);
         },
-
-        // 🔥 THIS FIXES YOUR ISSUE
         onProfileUpdated: (data) {
           setState(() {
             _username = data["name"];
@@ -213,7 +212,35 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
 
                 const Divider(height: 30),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildActionButton(
+                        context,
+                        question: "Missing something?",
+                        label: "Lost",
+                        color: Colors.red[900]!,
+                        navigateTo: const LostScreen(),
+                      ),
+                      const SizedBox(height: 20),
+                      _buildActionButton(
+                        context,
+                        question: "Found something?",
+                        label: "Found",
+                        color: Colors.green[800]!,
+                        navigateTo: FoundScreen(profileImage: _profileImage,),
+                      ),
+                    ],
+                  ),
+                ),
 
+                const SizedBox(height: 25),
                 const Text("Recent posts",
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
 
@@ -285,6 +312,31 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
+    );
+
+  }
+  Widget _buildActionButton(
+      BuildContext context, {
+        required String question,
+        required String label,
+        required Color color,
+        required Widget navigateTo,
+      }) {
+    return Column(
+      children: [
+        Text(question),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => navigateTo),
+            );
+          },
+          style: ElevatedButton.styleFrom(backgroundColor: color),
+          child: Text(label),
+        ),
+      ],
     );
   }
 }

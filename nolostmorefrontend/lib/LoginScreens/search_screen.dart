@@ -5,7 +5,9 @@ import 'dart:convert';
 import 'item_detail_screen.dart';
 
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key});
+
+  final String profileImage;
+  const SearchScreen({super.key, required this.profileImage});
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -185,9 +187,14 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget _buildHeader() {
     return Row(
       children: [
-        const CircleAvatar(
+        CircleAvatar(
           radius: 25,
-          backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+          backgroundImage: widget.profileImage.isNotEmpty
+              ? NetworkImage(widget.profileImage)
+              : null,
+          child: widget.profileImage.isEmpty
+              ? const Icon(Icons.person)
+              : null,
         ),
         const SizedBox(width: 15),
         Expanded(

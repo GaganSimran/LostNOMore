@@ -5,7 +5,8 @@ import 'dart:convert';
 import 'item_detail_screen.dart';
 
 class FoundScreen extends StatefulWidget {
-  const FoundScreen({super.key});
+  final String profileImage;
+  const FoundScreen({super.key, required this.profileImage});
 
   @override
   State<FoundScreen> createState() => _FoundScreenState();
@@ -32,7 +33,7 @@ class _FoundScreenState extends State<FoundScreen> {
     return jsonDecode(res.body);
   }
 
-  // ✅ SEARCH BY ITEM CODE
+  // SEARCH BY ITEM CODE
   void findItemById(List items) {
     final input = idController.text.trim();
 
@@ -86,9 +87,14 @@ class _FoundScreenState extends State<FoundScreen> {
                   // HEADER
                   Row(
                     children: [
-                      const CircleAvatar(
+                      CircleAvatar(
                         radius: 25,
-                        backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+                        backgroundImage: widget.profileImage.isNotEmpty
+                            ? NetworkImage(widget.profileImage)
+                            : null,
+                        child: widget.profileImage.isEmpty
+                            ? const Icon(Icons.person)
+                            : null,
                       ),
                       const SizedBox(width: 15),
                       Expanded(
@@ -126,7 +132,7 @@ class _FoundScreenState extends State<FoundScreen> {
 
                   const SizedBox(height: 10),
 
-                  // ✅ INPUT FIELD
+                  // INPUT FIELD
                   TextField(
                     controller: idController,
                     decoration: InputDecoration(
@@ -142,7 +148,7 @@ class _FoundScreenState extends State<FoundScreen> {
 
                   const SizedBox(height: 20),
 
-                  // ✅ BUTTON SEARCH
+                  //  BUTTON SEARCH
                   SizedBox(
                     width: double.infinity,
                     height: 50,
@@ -189,7 +195,7 @@ class _FoundScreenState extends State<FoundScreen> {
 
                   const SizedBox(height: 20),
 
-                  // ✅ REAL POSTS (LIKE HOME SCREEN)
+                  //  REAL POSTS (LIKE HOME SCREEN)
                   GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),

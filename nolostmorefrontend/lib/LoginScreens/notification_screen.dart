@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'notification_service.dart';
 class NotificationScreen extends StatefulWidget {
   final String username;
-
-  const NotificationScreen({super.key, required this.username});
+  final String profileImage;
+  const NotificationScreen({super.key, required this.username,required this.profileImage,});
 
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
@@ -20,11 +20,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: const Padding(
-          padding: EdgeInsets.all(8.0),
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
           child: CircleAvatar(
-            backgroundImage:
-            NetworkImage('https://via.placeholder.com/150'),
+            backgroundImage: widget.profileImage.isNotEmpty
+                ? NetworkImage(widget.profileImage)
+                : null,
+            child: widget.profileImage.isEmpty
+                ? const Icon(Icons.person)
+                : null,
           ),
         ),
         title: TextField(
