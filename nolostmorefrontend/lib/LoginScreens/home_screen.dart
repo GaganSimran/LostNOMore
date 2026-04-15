@@ -11,8 +11,17 @@ import 'item_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final String username;
+  final int userId;
+  final String profileImage;
+  final String bio;
 
-  const HomeScreen({super.key, required this.username});
+  const HomeScreen({
+    super.key,
+    required this.username,
+    required this.userId,
+    required this.profileImage,
+    required this.bio,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -26,10 +35,20 @@ class _HomeScreenState extends State<HomeScreen> {
   double _brightness = 1.0;
   bool _isDarkMode = false;
 
+  // 🔥 NEW STATE (IMPORTANT)
+  late String _profileImage;
+  late String _username;
+  late String _bio;
+
   @override
   void initState() {
     super.initState();
     itemsFuture = fetchItems();
+
+    // 🔥 INIT STATE
+    _profileImage = widget.profileImage;
+    _username = widget.username;
+    _bio = widget.bio;
   }
 
   Future<List> fetchItems() async {
@@ -55,16 +74,30 @@ class _HomeScreenState extends State<HomeScreen> {
       _homeContent(),
       const SearchScreen(),
       const SizedBox(),
-      NotificationScreen(username: widget.username),
+      NotificationScreen(username: _username),
+
+      // 🔥 UPDATED SETTINGS SCREEN
       SettingsScreen(
-        username: widget.username,
+        username: _username,
         brightness: _brightness,
+        bio: _bio,
+        profileImage: _profileImage,
+        userId: widget.userId,
         isDarkMode: _isDarkMode,
         onBrightnessChanged: (val) {
           setState(() => _brightness = val);
         },
         onThemeChanged: (val) {
           setState(() => _isDarkMode = val);
+        },
+
+        // 🔥 THIS FIXES YOUR ISSUE
+        onProfileUpdated: (data) {
+          setState(() {
+            _username = data["name"];
+            _bio = data["bio"];
+            _profileImage = data["image"];
+          });
         },
       ),
     ];
@@ -113,7 +146,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
 
-        // 🔥 SMOOTH BRIGHTNESS (FIXED)
         IgnorePointer(
           child: AnimatedOpacity(
             duration: const Duration(milliseconds: 100),
@@ -143,49 +175,44 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
 
-                Text(
-                  "Hello, ${widget.username}",
-                  style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
 
-                const SizedBox(height: 4),
+                    // PROFILE IMAGE (LEFT SIDE)
+                    CircleAvatar(
+                      radius: 30,
+                      backgroundImage:
+                      _profileImage.isNotEmpty ? NetworkImage(_profileImage) : null,
+                      child: _profileImage.isEmpty ? const Icon(Icons.person) : null,
+                    ),
 
-                Text(
-                  "Discover What's happening on Campus",
-                  style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                    const SizedBox(width: 15),
+
+                    //TEXT (RIGHT SIDE)
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Hello, $_username",
+                            style: const TextStyle(
+                                fontSize: 28, fontWeight: FontWeight.bold),
+                          ),
+
+                          const SizedBox(height: 4),
+
+                          Text(
+                            "Discover What's happening on Campus",
+                            style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
 
                 const Divider(height: 30),
-
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Column(
-                    children: [
-                      _buildActionButton(
-                        context,
-                        question: "Missing something?",
-                        label: "Lost",
-                        color: Colors.red[900]!,
-                        navigateTo: const LostScreen(),
-                      ),
-                      const SizedBox(height: 20),
-                      _buildActionButton(
-                        context,
-                        question: "Found something?",
-                        label: "Found",
-                        color: Colors.green[800]!,
-                        navigateTo: const FoundScreen(),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 25),
 
                 const Text("Recent posts",
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
@@ -258,31 +285,6 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
-    );
-  }
-
-  Widget _buildActionButton(
-      BuildContext context, {
-        required String question,
-        required String label,
-        required Color color,
-        required Widget navigateTo,
-      }) {
-    return Column(
-      children: [
-        Text(question),
-        const SizedBox(height: 8),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => navigateTo),
-            );
-          },
-          style: ElevatedButton.styleFrom(backgroundColor: color),
-          child: Text(label),
-        ),
-      ],
     );
   }
 }

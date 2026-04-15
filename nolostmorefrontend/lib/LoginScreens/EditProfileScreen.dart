@@ -1,3 +1,4 @@
+import 'dart:io'; // ✅ ADDED
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -93,11 +94,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final displayImage = image != null
-        ? Image.network(image!.path).image
-        : (widget.currentImage.isNotEmpty
-        ? NetworkImage(widget.currentImage)
-        : null);
+    ImageProvider? displayImage;
+
+    if (image != null) {
+      displayImage = FileImage(File(image!.path));
+    } else if (widget.currentImage.isNotEmpty) {
+      displayImage = NetworkImage(widget.currentImage);
+    } else {
+      displayImage = null;
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text("Edit Profile")),

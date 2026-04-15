@@ -4,13 +4,14 @@ import 'EditProfileScreen.dart';
 class SettingsScreen extends StatefulWidget {
   final String username;
   final String bio;
-
-  // 🔥 ADDED (for global control)
+  final int userId;
+  // ADDED (for global control)
   final double brightness;
   final bool isDarkMode;
   final Function(double) onBrightnessChanged;
   final Function(bool) onThemeChanged;
-
+  final Function(Map<String, dynamic>) onProfileUpdated;
+  final String profileImage;
   const SettingsScreen({
     super.key,
     required this.username,
@@ -18,6 +19,9 @@ class SettingsScreen extends StatefulWidget {
     required this.isDarkMode,
     required this.onBrightnessChanged,
     required this.onThemeChanged,
+    required this.profileImage,
+    required this.userId,
+    required this.onProfileUpdated,
     this.bio = '"Certified Oops, I dropped it specialist."',
   });
 
@@ -163,6 +167,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     super.initState();
     username = widget.username;
     bio = widget.bio;
+    profileImage = widget.profileImage;
   }
 
   @override
@@ -191,9 +196,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               CircleAvatar(
                 radius: 35,
-                backgroundImage: profileImage.isNotEmpty
-                    ? NetworkImage(profileImage)
-                    : const NetworkImage('https://i.pravatar.cc/150'),
+                backgroundImage:
+                profileImage.isNotEmpty ? NetworkImage(profileImage) : null,
+                child: profileImage.isEmpty
+                    ? const Icon(Icons.person)
+                    : null,
               ),
 
               const SizedBox(width: 16),
@@ -217,7 +224,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (_) => EditProfileScreen(
-                              userId: 1,
+                              userId: widget.userId,
                               currentName: username,
                               currentBio: bio,
                               currentImage: profileImage,
@@ -229,8 +236,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           setState(() {
                             username = updated["name"] ?? username;
                             bio = updated["bio"] ?? bio;
-                            profileImage =
-                                updated["image"] ?? profileImage;
+                            profileImage = updated["image"] ?? profileImage;
+                          });
+
+                          // SEND BACK TO HOME
+                          widget.onProfileUpdated({
+                            "name": username,
+                            "bio": bio,
+                            "image": profileImage,
                           });
                         }
                       },

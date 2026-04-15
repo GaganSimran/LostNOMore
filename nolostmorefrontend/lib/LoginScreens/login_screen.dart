@@ -20,7 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void handleLogin() async {
     try {
-      // 🔐 Firebase Login
+      //Firebase Login
       UserCredential userCredential =
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailController.text.trim(),
@@ -39,8 +39,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
       print("✅ Email verified — login success");
 
-      // ✅ CALL LOGIN API (NOT SIGNUP)
+      // CALL LOGIN API (NOT SIGNUP)
       final url = Uri.parse("http://192.168.2.27:3000/users/login");
+
 
       final response = await http.post(
         url,
@@ -56,14 +57,19 @@ class _LoginScreenState extends State<LoginScreen> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
-        final name = data['name']; // ✅ REAL NAME FROM DB
-
+        final name = data['name'];
+        final userId = data['id'];
+        final image = data['profile_image'] ?? "";
+        final bio = data['bio'] ?? "";
         // ✅ NAVIGATE WITH REAL NAME
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => HomeScreen(
               username: name,
+              userId: userId,
+              profileImage: image,
+              bio: bio,
             ),
           ),
         );
