@@ -23,7 +23,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
     }
 
     try {
-      // ✅ SEND RESET EMAIL FROM FIREBASE
+      // SEND RESET EMAIL FROM FIREBASE
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -33,9 +33,9 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
         ),
       );
 
-      print("✅ Reset email sent to: $email");
+      print(" Reset email sent to: $email");
 
-      // ✅ GO BACK TO LOGIN SCREEN AFTER 2 SEC
+      //  GO BACK TO LOGIN SCREEN AFTER 2 SEC
       Future.delayed(Duration(seconds: 2), () {
         Navigator.pop(context);
       });

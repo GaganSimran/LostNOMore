@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'app_config.dart';
 import 'item_detail_screen.dart';
 
 class FoundScreen extends StatefulWidget {
@@ -27,7 +27,7 @@ class _FoundScreenState extends State<FoundScreen> {
 
   Future<List> fetchItems() async {
     final res = await http.get(
-      Uri.parse("http://192.168.2.27:3000/items"),
+      Uri.parse(AppConfig.items),
     );
 
     return jsonDecode(res.body);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:nolostmorefrontend/LoginScreens/app_config.dart';
 import 'dart:convert';
 
 import 'item_detail_screen.dart';
@@ -25,7 +26,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Future<List> fetchItems() async {
     final res = await http.get(
-      Uri.parse("http://192.168.2.27:3000/items"),
+      Uri.parse(AppConfig.items),
     );
 
     return jsonDecode(res.body);

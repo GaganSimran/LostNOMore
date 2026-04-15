@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nolostmorefrontend/LoginScreens/app_config.dart';
 import 'forget_password_screen.dart';
 import 'signup_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -40,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
       print("✅ Email verified — login success");
 
       // CALL LOGIN API (NOT SIGNUP)
-      final url = Uri.parse("http://192.168.2.27:3000/users/login");
+      final url = Uri.parse(AppConfig.login);
 
 
       final response = await http.post(
@@ -61,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
         final userId = data['id'];
         final image = data['profile_image'] ?? "";
         final bio = data['bio'] ?? "";
-        // ✅ NAVIGATE WITH REAL NAME
+        //  NAVIGATE WITH REAL NAME
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(

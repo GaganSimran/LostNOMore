@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
-
+import 'app_config.dart';
 class EditProfileScreen extends StatefulWidget {
   final int userId;
   final String currentName;
@@ -69,7 +69,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final imageUrl = await uploadToCloudinary();
 
     final response = await http.put(
-      Uri.parse("http://192.168.2.27:3000/users/${widget.userId}"),
+      Uri.parse("${AppConfig.users}/${widget.userId}"),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
         "name": nameController.text,

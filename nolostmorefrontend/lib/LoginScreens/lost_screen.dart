@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
+import 'package:nolostmorefrontend/LoginScreens/app_config.dart';
 
 import 'notification_service.dart';
 
@@ -62,7 +63,7 @@ class _LostScreenState extends State<LostScreen> {
     final itemCode = "ITEM${DateTime.now().millisecondsSinceEpoch}";
 
     final response = await http.post(
-      Uri.parse("http://192.168.2.27:3000/items"),
+      Uri.parse(AppConfig.items),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
         "user_id": 1,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:nolostmorefrontend/LoginScreens/app_config.dart';
 import 'dart:convert';
 
 import 'search_screen.dart';
@@ -53,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<List> fetchItems() async {
     final res = await http.get(
-      Uri.parse("http://192.168.2.27:3000/items"),
+      Uri.parse(AppConfig.items),
     );
 
     print("FETCH STATUS: ${res.statusCode}");
