@@ -123,7 +123,7 @@ class AdminPanelScreen extends StatelessWidget {
                       SizedBox(width: 12),
                       SummaryCard(
                         label: 'Pending Items',
-                        count: '2,
+                        count: '2',
                         icon: Icons.hourglass_empty,
                         color: Colors.brown,
                       ),
