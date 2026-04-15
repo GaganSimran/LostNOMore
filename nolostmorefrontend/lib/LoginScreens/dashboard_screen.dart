@@ -1,7 +1,27 @@
 import 'package:flutter/material.dart';
+import '../widgets/sidebar.dart';
+import '../widgets/header.dart';
+import '../widgets/cards.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
+
+  void _handleNavigation(BuildContext context, String item) {
+    switch (item) {
+      case 'Dashboard':
+        break;
+      case 'Manage Posts':
+        //i use pushnamed to switch between the screeens
+        Navigator.pushNamed(context, '/panel');
+        break;
+      case 'Reports':
+        Navigator.pushNamed(context, '/reports');
+        break;
+      case 'Settings':
+        Navigator.pushNamed(context, '/settings');
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -9,86 +29,87 @@ class DashboardScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFE0E0E0),
       body: Row(
         children: [
-          // Sidebar
-          Container(
-            width: 250,
-            color: const Color(0xFF1A237E),
-            child: Column(
-              children: [
-                const SizedBox(height: 40),
-                const Icon(Icons.search, color: Colors.white, size: 40),
-                const Text(
-                  "Lost & Found",
-                  style: TextStyle(color: Colors.white, fontSize: 18),
-                ),
-                const SizedBox(height: 30),
-
-                _sidebarItem(Icons.dashboard, "Dashboard", selected: true),
-
-                _sidebarItem(Icons.search, "Lost Items", onTap: () {}),
-                _sidebarItem(Icons.check_circle, "Found Items", onTap: () {}),
-                _sidebarItem(Icons.bar_chart, "Reports", onTap: () {}),
-
-                _sidebarItem(Icons.settings, "Settings", onTap: () {
-                  Navigator.pushNamed(context, '/settings');
-                }),
-
-                const Spacer(),
-
-                const ListTile(
-                  leading: CircleAvatar(backgroundColor: Colors.white24),
-                  title: Text("Admin",
-                      style: TextStyle(color: Colors.white)),
-                  subtitle: Text("admin@mail.com",
-                      style: TextStyle(color: Colors.white70, fontSize: 12)),
-                ),
-
-                const SizedBox(height: 20),
-              ],
-            ),
+          AppSidebar(
+            selected: 'Dashboard',
+            onItemTap: (item) => _handleNavigation(context, item),
           ),
-
-          // Main Content
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.all(24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildHeader(),
+                  const AppHeader(title: 'Dashboard'),
                   const SizedBox(height: 30),
 
-                  // Stats
-                  Row(
+                  const Row(
                     children: [
-                      _statCard("Total Lost Items", "25", Icons.search, Colors.grey),
-                      _statCard("Total Found Items", "6", Icons.check_circle, Colors.green),
-                      _statCard("Returned Items", "5", Icons.shield, Colors.blueGrey),
-                      _statCard("Pending", "2", Icons.person_search, Colors.brown),
+                      SummaryCard(
+                        label: 'Total Lost Items',
+                        count: '25',
+                        icon: Icons.search,
+                        color: Colors.grey,
+                      ),
+                      SizedBox(width: 12),
+                      SummaryCard(
+                        label: 'Total Found Items',
+                        count: '6',
+                        icon: Icons.check_circle,
+                        color: Colors.green,
+                      ),
+                      SizedBox(width: 12),
+                      SummaryCard(
+                        label: 'Returned Items',
+                        count: '5',
+                        icon: Icons.shield,
+                        color: Colors.blueGrey,
+                      ),
+                      SizedBox(width: 12),
+                      SummaryCard(
+                        label: 'Pending',
+                        count: '2',
+                        icon: Icons.person_search,
+                        color: Colors.brown,
+                      ),
                     ],
                   ),
 
                   const SizedBox(height: 40),
 
                   const Text(
-                    "Recent Activity",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    'Recent Activity',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
 
                   const SizedBox(height: 20),
 
                   Expanded(
                     child: ListView(
-                      children: [
-                        _activityTile(Icons.search,
-                            "John Doe reported a lost wallet", "2 hours ago"),
-                        _activityTile(Icons.check_circle,
-                            "Phone found near campus", "Aug 24, 2025",
-                            iconColor: Colors.green),
-                        _activityTile(Icons.shield,
-                            "Laptop returned to security", "May 20, 2025"),
-                        _activityTile(Icons.search,
-                            "Keys reported missing", "May 22, 2024"),
+                      children: const [
+                        _ActivityTile(
+                          icon: Icons.search,
+                          text: 'John Doe reported a lost wallet',
+                          time: '2 hours ago',
+                        ),
+                        _ActivityTile(
+                          icon: Icons.check_circle,
+                          text: 'Phone found near campus',
+                          time: 'Aug 24, 2025',
+                          iconColor: Colors.green,
+                        ),
+                        _ActivityTile(
+                          icon: Icons.shield,
+                          text: 'Laptop returned to security',
+                          time: 'May 20, 2025',
+                        ),
+                        _ActivityTile(
+                          icon: Icons.search,
+                          text: 'Keys reported missing',
+                          time: 'May 22, 2024',
+                        ),
                       ],
                     ),
                   ),
@@ -100,81 +121,35 @@ class DashboardScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  // Sidebar item
-  Widget _sidebarItem(IconData icon, String title,
-      {bool selected = false, VoidCallback? onTap}) {
-    return Container(
-      color: selected ? Colors.blue.withOpacity(0.3) : Colors.transparent,
-      child: ListTile(
-        leading: Icon(icon, color: Colors.white),
-        title: Text(title, style: const TextStyle(color: Colors.white)),
-        onTap: onTap,
-      ),
-    );
-  }
+class _ActivityTile extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final String time;
+  final Color iconColor;
 
-  // Header
-  Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: const [
-        Text(
-          "Dashboard",
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w500),
-        ),
-        Row(
-          children: [
-            Icon(Icons.search, color: Colors.grey),
-            SizedBox(width: 20),
-            CircleAvatar(child: Icon(Icons.person)),
-          ],
-        )
-      ],
-    );
-  }
+  const _ActivityTile({
+    required this.icon,
+    required this.text,
+    required this.time,
+    this.iconColor = Colors.grey,
+  });
 
-  // Stat card
-  Widget _statCard(
-      String label, String count, IconData icon, Color color) {
-    return Expanded(
-      child: Card(
-        elevation: 2,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Icon(icon, color: color, size: 30),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(label,
-                      style: const TextStyle(
-                          fontSize: 12, color: Colors.black54)),
-                  Text(count,
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold)),
-                ],
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Activity tile
-  Widget _activityTile(IconData icon, String text, String time,
-      {Color iconColor = Colors.grey}) {
+  @override
+  Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
         leading: Icon(icon, color: iconColor),
-        title: Text(text,
-            style: const TextStyle(fontWeight: FontWeight.w500)),
-        trailing:
-        Text(time, style: const TextStyle(color: Colors.grey)),
+        title: Text(
+          text,
+          style: const TextStyle(fontWeight: FontWeight.w500),
+        ),
+        trailing: Text(
+          time,
+          style: const TextStyle(color: Colors.grey),
+        ),
       ),
     );
   }
