@@ -12,13 +12,14 @@ class AdminSettingsScreen extends StatefulWidget {
 }
 
 class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
+  //this is for the text fields
   late final TextEditingController fullNameController;
   late final TextEditingController emailController;
   late final TextEditingController passwordController;
   late final TextEditingController officeNameController;
   late final TextEditingController officeEmailController;
   late final TextEditingController officePhoneController;
-
+  //this is for the toggles
   late bool emailNotifications;
   late bool newLostItemNotification;
   late bool markPostsPending;
@@ -26,7 +27,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   @override
   void initState() {
     super.initState();
-
+  //we assign the controllers the fake data that we created
     fullNameController =
         TextEditingController(text: mockAdminProfile.fullName);
     emailController =
@@ -39,23 +40,14 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         TextEditingController(text: mockAdminProfile.officeEmail);
     officePhoneController =
         TextEditingController(text: mockAdminProfile.officePhone);
-
+//initializr the toggle
     emailNotifications = mockAdminProfile.emailNotifications;
     newLostItemNotification = mockAdminProfile.newLostItemNotification;
     markPostsPending = mockAdminProfile.markPostsPending;
   }
 
-  @override
-  void dispose() {
-    fullNameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    officeNameController.dispose();
-    officeEmailController.dispose();
-    officePhoneController.dispose();
-    super.dispose();
-  }
 
+//as i said before so when we click this it redirects to the navigation we selected
   void _handleNavigation(BuildContext context, String item) {
     switch (item) {
       case 'Dashboard':
