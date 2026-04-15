@@ -3,7 +3,7 @@ import '../widgets/sidebar.dart';
 import '../widgets/header.dart';
 import '../widgets/cards.dart';
 
-class DashboardScreen extends StatefulWidget {
+class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
   void _handleNavigation(BuildContext context, String item) {
