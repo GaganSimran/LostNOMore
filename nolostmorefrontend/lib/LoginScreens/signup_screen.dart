@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:nolostmorefrontend/LoginScreens/app_config.dart';
 class SignupScreen extends StatefulWidget {
   @override
   _SignupScreenState createState() => _SignupScreenState();
@@ -47,7 +48,22 @@ class _SignupScreenState extends State<SignupScreen> {
       await user!.sendEmailVerification();
 
       print("📩 Verification email sent!");
+      final url = Uri.parse("${AppConfig.baseUrl}/users/signup");
 
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "firebase_uid": user.uid,
+          "email": user.email,
+          "name": nameController.text,
+          "phone": phoneController.text,
+          "course": "flutter",
+          "password": passwordController.text
+        }),
+      );
+
+      print(response.body);
     } catch (e) {
       if (e is FirebaseAuthException) {
         print("❌ Firebase Error Code: ${e.code}");
