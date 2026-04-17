@@ -1,13 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'forget_password_screen.dart';
 import 'signup_screen.dart';
 import 'admin_panel_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -170,7 +165,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    /*
                     onPressed: handleLogin,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
@@ -183,22 +177,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-            */
-                    onPressed: () async {
-                      final response = await http.post(
-                        Uri.parse('https://nolostmore-backend.onrender.com/admin/create-admin'),
-                        headers: {'Content-Type': 'application/json'},
-                        body: jsonEncode({
-                          'email': 'kbkbistwisted@gmail.com',
-                          'password': '123456789',
-                          'displayName': 'Francis',
-                        }),
-                      );
-
-                      print(response.body);
-                    },
-                    child: Text("Create Admin"),
-                  )
                 ),
 
                 SizedBox(height: 15),
