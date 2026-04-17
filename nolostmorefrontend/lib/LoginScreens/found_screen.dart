@@ -16,28 +16,31 @@ class _FoundScreenState extends State<FoundScreen> {
   String selectedFilter = 'Last 24 hours';
 
   final TextEditingController idController = TextEditingController();
+  final TextEditingController searchController = TextEditingController();
 
-  late Future<List> itemsFuture;
+  List allItems = [];
+  List filteredItems = [];
 
   @override
   void initState() {
     super.initState();
-    itemsFuture = fetchItems();
+    fetchItems();
   }
 
-  Future<List> fetchItems() async {
-    final res = await http.get(
-      Uri.parse(AppConfig.items),
-    );
+  Future<void> fetchItems() async {
+    final res = await http.get(Uri.parse(AppConfig.items));
+    final data = jsonDecode(res.body);
 
-    return jsonDecode(res.body);
+    setState(() {
+      allItems = data;
+      filteredItems = data;
+    });
   }
 
-  // SEARCH BY ITEM CODE
-  void findItemById(List items) {
+  void findItemById() {
     final input = idController.text.trim();
 
-    final foundItem = items.firstWhere(
+    final foundItem = allItems.firstWhere(
           (item) => item['item_code'] == input,
       orElse: () => null,
     );
@@ -60,209 +63,226 @@ class _FoundScreenState extends State<FoundScreen> {
     }
   }
 
+  void onSearchChanged(String query) {
+    final lower = query.toLowerCase();
+
+    setState(() {
+      filteredItems = allItems.where((item) {
+        final title = (item['title'] ?? "").toString().toLowerCase();
+        final code = (item['item_code'] ?? "").toString().toLowerCase();
+        return title.contains(lower) || code.contains(lower);
+      }).toList();
+    });
+  }
+
+  void applyTimeFilter(String type) {
+    setState(() {
+      if (selectedFilter == type) {
+        selectedFilter = '';
+        filteredItems = allItems;
+        return;
+      }
+
+      selectedFilter = type;
+
+      final now = DateTime.now();
+
+      filteredItems = allItems.where((item) {
+        final rawDate = item['created_at'];
+        if (rawDate == null) return false;
+
+        final itemDate = DateTime.tryParse(rawDate.toString());
+        if (itemDate == null) return false;
+
+        if (type == 'Last 24 hours') {
+          return now.difference(itemDate).inHours <= 24;
+        } else if (type == 'Last week') {
+          return now.difference(itemDate).inDays <= 7;
+        } else if (type == 'Last Month') {
+          return now.difference(itemDate).inDays <= 30;
+        }
+
+        return true;
+      }).toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
       body: SafeArea(
-        child: FutureBuilder(
-          future: itemsFuture,
-          builder: (context, snapshot) {
-
-            if (!snapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            final items = snapshot.data as List;
-
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: allItems.isEmpty
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 10),
+              Row(
                 children: [
-
-                  const SizedBox(height: 10),
-
-                  // HEADER
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 25,
-                        backgroundImage: widget.profileImage.isNotEmpty
-                            ? NetworkImage(widget.profileImage)
-                            : null,
-                        child: widget.profileImage.isEmpty
-                            ? const Icon(Icons.person)
-                            : null,
+                  CircleAvatar(
+                    radius: 25,
+                    backgroundImage: widget.profileImage.isNotEmpty
+                        ? NetworkImage(widget.profileImage)
+                        : null,
+                    child: widget.profileImage.isEmpty
+                        ? const Icon(Icons.person)
+                        : null,
+                  ),
+                  const SizedBox(width: 15),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      const SizedBox(width: 15),
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const TextField(
-                            decoration: InputDecoration(
-                              hintText: 'Search',
-                              icon: Icon(Icons.search, color: Colors.grey),
-                              border: InputBorder.none,
-                            ),
-                          ),
+                      child: TextField(
+                        controller: searchController,
+                        onChanged: onSearchChanged,
+                        decoration: const InputDecoration(
+                          hintText: 'Search',
+                          icon: Icon(Icons.search, color: Colors.grey),
+                          border: InputBorder.none,
                         ),
                       ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  const Text(
-                    'Find Items',
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                  ),
-
-                  const Divider(),
-
-                  const Text(
-                    'Find item by unique ID number',
-                    style: TextStyle(color: Colors.grey, fontSize: 16),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  // INPUT FIELD
-                  TextField(
-                    controller: idController,
-                    decoration: InputDecoration(
-                      hintText: 'Unique ID number',
-                      filled: true,
-                      fillColor: Colors.blueGrey[50],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
-                      ),
                     ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  //  BUTTON SEARCH
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: () => findItemById(items),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF003CC0),
-                      ),
-                      child: const Text(
-                        'Find my item',
-                        style: TextStyle(color: Colors.white, fontSize: 18),
-                      ),
-                    ),
-                  ),
-
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 25.0),
-                    child: Center(
-                      child: Text(
-                        'OR',
-                        style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 20),
-                      ),
-                    ),
-                  ),
-
-                  const Text(
-                    'Find by posts',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-
-                  const Divider(),
-
-                  const SizedBox(height: 10),
-
-                  // FILTERS
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _filterButton('Last 24 hours'),
-                      _filterButton('Last week'),
-                      _filterButton('Last Month'),
-                    ],
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  //  REAL POSTS (LIKE HOME SCREEN)
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: items.length,
-                    gridDelegate:
-                    const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 15,
-                      mainAxisSpacing: 15,
-                      childAspectRatio: 0.8,
-                    ),
-                    itemBuilder: (context, index) {
-                      final item = items[index];
-
-                      final imageUrl = item['image_url'] ?? "";
-                      final hasImage = imageUrl.isNotEmpty &&
-                          imageUrl.toString().startsWith("http");
-
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ItemDetailScreen(item: item),
-                            ),
-                          );
-                        },
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-
-                            Container(
-                              height: 120,
-                              decoration: BoxDecoration(
-                                color: Colors.grey[300],
-                                borderRadius: BorderRadius.circular(10),
-                                image: hasImage
-                                    ? DecorationImage(
-                                  image: NetworkImage(imageUrl),
-                                  fit: BoxFit.cover,
-                                )
-                                    : null,
-                              ),
-                              child: !hasImage
-                                  ? const Icon(Icons.image)
-                                  : null,
-                            ),
-
-                            const SizedBox(height: 8),
-
-                            Text('• ${item['title'] ?? ""}',
-                                style: const TextStyle(fontWeight: FontWeight.bold)),
-
-                            Text('• Status: ${item['status'] ?? ""}',
-                                style: const TextStyle(fontSize: 12)),
-
-                            Text('• ${item['category'] ?? ""}',
-                                style: const TextStyle(fontSize: 12)),
-                          ],
-                        ),
-                      );
-                    },
                   ),
                 ],
               ),
-            );
-          },
+              const SizedBox(height: 30),
+              const Text(
+                'Find Items',
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              ),
+              const Divider(),
+              const Text(
+                'Find item by unique ID number',
+                style: TextStyle(color: Colors.grey, fontSize: 16),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: idController,
+                decoration: InputDecoration(
+                  hintText: 'Unique ID number',
+                  filled: true,
+                  fillColor: Colors.blueGrey[50],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: findItemById,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF003CC0),
+                  ),
+                  child: const Text(
+                    'Find my item',
+                    style: TextStyle(color: Colors.white, fontSize: 18),
+                  ),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 25.0),
+                child: Center(
+                  child: Text(
+                    'OR',
+                    style: TextStyle(
+                        color: Colors.orange,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20),
+                  ),
+                ),
+              ),
+              const Text(
+                'Find by posts',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const Divider(),
+              const SizedBox(height: 10),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  children: [
+                    _filterButton('Last 24 hours'),
+                    _filterButton('Last week'),
+                    _filterButton('Last Month'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: filteredItems.length,
+                gridDelegate:
+                const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 15,
+                  mainAxisSpacing: 15,
+                  childAspectRatio: 0.8,
+                ),
+                itemBuilder: (context, index) {
+                  final item = filteredItems[index];
+
+                  final imageUrl = item['image_url'] ?? "";
+                  final hasImage = imageUrl.isNotEmpty &&
+                      imageUrl.toString().startsWith("http");
+
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ItemDetailScreen(item: item),
+                        ),
+                      );
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            height: 130,
+                            width: double.infinity,
+                            color: Colors.grey[300],
+                            child: hasImage
+                                ? Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                            )
+                                : const Icon(Icons.image),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '• ${item['title'] ?? ""}',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          '• Status: ${item['status'] ?? ""}',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        Text(
+                          '• ${item['category'] ?? ""}',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -270,20 +290,17 @@ class _FoundScreenState extends State<FoundScreen> {
 
   Widget _filterButton(String text) {
     bool isSelected = selectedFilter == text;
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-        child: ElevatedButton(
-          onPressed: () {
-            setState(() {
-              selectedFilter = text;
-            });
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: isSelected ? Colors.black : Colors.black87,
-          ),
-          child: Text(text,
-              style: const TextStyle(color: Colors.white, fontSize: 12)),
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: ElevatedButton(
+        onPressed: () => applyTimeFilter(text),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isSelected ? Colors.orange : Colors.black87,
+        ),
+        child: Text(
+          text,
+          style: const TextStyle(color: Colors.white, fontSize: 12),
         ),
       ),
     );

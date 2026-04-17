@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:nolostmorefrontend/LoginScreens/app_config.dart';
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'item_detail_screen.dart';
 
@@ -18,18 +19,127 @@ class _SearchScreenState extends State<SearchScreen> {
 
   late Future<List> itemsFuture;
 
+  List allItems = [];
+  List filteredItems = [];
+
+  List<String> searchHistory = [];
+
+  TextEditingController searchController = TextEditingController();
+
+  String selectedFilter = "";
+  String selectedCategory = "";
+
   @override
   void initState() {
     super.initState();
-    itemsFuture = fetchItems();
+    loadData();
   }
 
-  Future<List> fetchItems() async {
-    final res = await http.get(
-      Uri.parse(AppConfig.items),
-    );
+  Future<void> loadData() async {
+    await loadItems();
+    await loadHistory();
+  }
 
-    return jsonDecode(res.body);
+  Future<void> loadItems() async {
+    final res = await http.get(Uri.parse(AppConfig.items));
+    final data = jsonDecode(res.body);
+
+    setState(() {
+      allItems = data;
+      filteredItems = data;
+    });
+  }
+
+  void onSearchChanged(String query) {
+    final lower = query.toLowerCase();
+
+    setState(() {
+      filteredItems = allItems.where((item) {
+        final title = (item['title'] ?? "").toString().toLowerCase();
+        final code = (item['item_code'] ?? "").toString().toLowerCase();
+
+        return title.contains(lower) || code.contains(lower);
+      }).toList();
+    });
+  }
+
+  Future<void> saveToHistory(String query) async {
+    if (query.trim().isEmpty) return;
+
+    final prefs = await SharedPreferences.getInstance();
+
+    searchHistory.remove(query);
+    searchHistory.insert(0, query);
+
+    await prefs.setStringList("search_history", searchHistory);
+  }
+
+  Future<void> loadHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      searchHistory = prefs.getStringList("search_history") ?? [];
+    });
+  }
+
+  Future<void> clearHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.remove("search_history");
+
+    setState(() {
+      searchHistory.clear();
+    });
+  }
+
+  void applyTimeFilter(String type) {
+    setState(() {
+      if (selectedFilter == type) {
+        selectedFilter = "";
+        filteredItems = allItems;
+        return;
+      }
+
+      selectedFilter = type;
+
+      final now = DateTime.now();
+
+      filteredItems = allItems.where((item) {
+        final rawDate = item['created_at'];
+
+        if (rawDate == null) return false;
+
+        final itemDate = DateTime.tryParse(rawDate.toString());
+        if (itemDate == null) return false;
+
+        if (type == "24h") {
+          return now.difference(itemDate).inHours <= 24;
+        } else if (type == "week") {
+          return now.difference(itemDate).inDays <= 7;
+        } else if (type == "month") {
+          return now.difference(itemDate).inDays <= 30;
+        }
+
+        return true;
+      }).toList();
+    });
+  }
+
+  void applyCategoryFilter(String category) {
+    setState(() {
+      if (selectedCategory == category) {
+        selectedCategory = "";
+        filteredItems = allItems;
+        return;
+      }
+
+      selectedCategory = category;
+
+      filteredItems = allItems.where((item) {
+        final itemCategory = (item['category'] ?? "").toString();
+        return itemCategory.toLowerCase() == category.toLowerCase();
+      }).toList();
+    });
   }
 
   @override
@@ -78,16 +188,36 @@ class _SearchScreenState extends State<SearchScreen> {
 
               const SizedBox(height: 20),
 
-              // 🔥 REAL POSTS FROM BACKEND
-              FutureBuilder(
-                future: itemsFuture,
-                builder: (context, snapshot) {
+              if (searchController.text.isEmpty && searchHistory.isNotEmpty)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Recent Searches",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      children: searchHistory.map((item) {
+                        return ActionChip(
+                          label: Text(item),
+                          onPressed: () {
+                            searchController.text = item;
+                            onSearchChanged(item);
+                          },
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
 
-                  if (!snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+              const SizedBox(height: 20),
 
-                  final items = snapshot.data as List;
+              Builder(
+                builder: (context) {
+
+                  final items = filteredItems;
 
                   return Column(
                     children: items.map((item) {
@@ -112,7 +242,6 @@ class _SearchScreenState extends State<SearchScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
 
-                              // IMAGE
                               Container(
                                 height: 100,
                                 width: 100,
@@ -133,7 +262,6 @@ class _SearchScreenState extends State<SearchScreen> {
 
                               const SizedBox(width: 15),
 
-                              // TEXT
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -200,6 +328,11 @@ class _SearchScreenState extends State<SearchScreen> {
         const SizedBox(width: 15),
         Expanded(
           child: TextField(
+            controller: searchController,
+            onChanged: onSearchChanged,
+            onSubmitted: (value) {
+              saveToHistory(value);
+            },
             decoration: InputDecoration(
               hintText: "Search",
               prefixIcon: const Icon(Icons.search),
@@ -220,8 +353,8 @@ class _SearchScreenState extends State<SearchScreen> {
     final categories = [
       {'name': 'Wallets', 'color': Colors.orange[700], 'icon': Icons.wallet},
       {'name': 'Keys', 'color': Colors.orange[700], 'icon': Icons.vpn_key},
-      {'name': 'Air buds', 'color': Colors.orange[700], 'icon': Icons.headphones},
-      {'name': 'ID cards', 'color': Colors.orange[700], 'icon': Icons.badge},
+      {'name': 'AirPods', 'color': Colors.orange[700], 'icon': Icons.headphones},
+      {'name': 'ID Cards', 'color': Colors.orange[700], 'icon': Icons.badge},
       {'name': 'Books', 'color': Colors.orange[700], 'icon': Icons.book},
       {'name': 'Other', 'color': Colors.orange[700], 'icon': Icons.emoji_people},
     ];
@@ -237,24 +370,32 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
       itemCount: categories.length,
       itemBuilder: (context, index) {
-        return Container(
-          decoration: BoxDecoration(
-            color: categories[index]['color'] as Color,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            children: [
-              const SizedBox(width: 10),
-              Icon(categories[index]['icon'] as IconData, color: Colors.white),
-              const SizedBox(width: 10),
-              Text(
-                categories[index]['name'] as String,
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16),
-              ),
-            ],
+        final categoryName = categories[index]['name'] as String;
+        final isSelected = selectedCategory == categoryName;
+
+        return GestureDetector(
+          onTap: () => applyCategoryFilter(categoryName),
+          child: Container(
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? Colors.deepOrange
+                  : categories[index]['color'] as Color,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                const SizedBox(width: 10),
+                Icon(categories[index]['icon'] as IconData, color: Colors.white),
+                const SizedBox(width: 10),
+                Text(
+                  categories[index]['name'] as String,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -262,22 +403,32 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildTimeFilters() {
-    final filters = ["Last 24 hours", "Last week", "Last month"];
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: filters.map((filter) {
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.black,
-            borderRadius: BorderRadius.circular(5),
-          ),
-          child: Text(
-            filter,
-            style: const TextStyle(color: Colors.white, fontSize: 12),
-          ),
-        );
-      }).toList(),
+      children: [
+        _filterTab("Last 24 hours", "24h"),
+        _filterTab("Last week", "week"),
+        _filterTab("Last month", "month"),
+      ],
+    );
+  }
+
+  Widget _filterTab(String label, String type) {
+    final isSelected = selectedFilter == type;
+
+    return GestureDetector(
+      onTap: () => applyTimeFilter(type),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.orange : Colors.black,
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(color: Colors.white, fontSize: 12),
+        ),
+      ),
     );
   }
 }

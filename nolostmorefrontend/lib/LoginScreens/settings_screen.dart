@@ -171,6 +171,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       barrierDismissible: true,
       builder: (context) {
         return Dialog(
+          backgroundColor: Colors.red.shade700,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -179,26 +180,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.logout, size: 40, color: Colors.red),
+                const Icon(Icons.logout, size: 40, color: Colors.white),
                 const SizedBox(height: 10),
                 const Text(
                   "Logout",
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 10),
                 const Text(
                   "Are you sure you want to logout?",
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey),
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: Colors.white),
+                        ),
                         onPressed: () => Navigator.pop(context),
                         child: const Text("Cancel"),
                       ),
@@ -207,7 +216,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.red,
                         ),
                         onPressed: () {
                           Navigator.pop(context);
