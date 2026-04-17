@@ -7,7 +7,8 @@ import 'package:nolostmorefrontend/LoginScreens/app_config.dart';
 import 'notification_service.dart';
 
 class LostScreen extends StatefulWidget {
-  const LostScreen({super.key});
+  final String username;
+  const LostScreen({super.key, required this.username});
 
   @override
   State<LostScreen> createState() => _LostScreenState();
@@ -78,10 +79,8 @@ class _LostScreenState extends State<LostScreen> {
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-
-
       NotificationService.addNotification(
-          "Hey ${"Krish"}, your item has been posted successfully.\nItem ID: $itemCode"
+        "Hey ${widget.username}, your item has been posted successfully.\nItem ID: $itemCode",
       );
 
       Navigator.pop(context);
@@ -101,17 +100,39 @@ class _LostScreenState extends State<LostScreen> {
     }
   }
 
+  InputDecoration _inputStyle(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: Colors.grey[50],
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: Colors.blue.shade100),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: Colors.blue.shade100),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Colors.blue, width: 1.5),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF7F9FC),
 
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: const Icon(Icons.menu, color: Colors.black),
-        title: const Text("Report Lost Item",
-            style: TextStyle(color: Colors.black)),
+        title: const Text(
+          "Report Lost Item",
+          style: TextStyle(color: Colors.black),
+        ),
       ),
 
       body: SingleChildScrollView(
@@ -120,25 +141,44 @@ class _LostScreenState extends State<LostScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-            const Text('Upload Image'),
-            const SizedBox(height: 8),
+            const Text(
+              "Upload Image",
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 10),
 
             GestureDetector(
               onTap: pickImage,
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.symmetric(vertical: 28),
                 decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.blue.shade100),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    )
+                  ],
                 ),
                 child: Column(
                   children: [
-                    image == null
-                        ? const Icon(Icons.cloud_upload_outlined, size: 40)
-                        : Text(image!.name),
+                    Icon(
+                      image == null
+                          ? Icons.cloud_upload_outlined
+                          : Icons.check_circle,
+                      size: 45,
+                      color: image == null ? Colors.blue : Colors.orange,
+                    ),
                     const SizedBox(height: 10),
-                    const Text('Tap to upload image'),
+                    Text(
+                      image == null ? "Tap to upload image" : image!.name,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 13),
+                    ),
                   ],
                 ),
               ),
@@ -146,68 +186,115 @@ class _LostScreenState extends State<LostScreen> {
 
             const SizedBox(height: 20),
 
-            _input(titleController, 'Item name'),
-            _input(descController, 'Description'),
+            TextField(
+              controller: titleController,
+              decoration: _inputStyle("Item Name"),
+            ),
 
-            const Text("Category"),
-            DropdownButtonFormField(
-              value: selectedCategory,
-              items: categories.map((c) {
-                return DropdownMenuItem(value: c, child: Text(c));
-              }).toList(),
-              onChanged: (val) => setState(() => selectedCategory = val.toString()),
+            const SizedBox(height: 12),
+
+            TextField(
+              controller: descController,
+              maxLines: 3,
+              decoration: _inputStyle("Description"),
             ),
 
             const SizedBox(height: 15),
 
-            _input(locationController, 'Location'),
-
-            const SizedBox(height: 10),
-
-            ListTile(
-              title: Text(selectedDate == null
-                  ? "Select Date"
-                  : selectedDate.toString().split(" ")[0]),
-              trailing: const Icon(Icons.calendar_today),
-              onTap: pickDate,
+            const Text(
+              "Category",
+              style: TextStyle(fontWeight: FontWeight.w600),
             ),
 
-            const SizedBox(height: 30),
+            const SizedBox(height: 8),
+
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.blue.shade100),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton(
+                  value: selectedCategory,
+                  isExpanded: true,
+                  items: categories.map((c) {
+                    return DropdownMenuItem(value: c, child: Text(c));
+                  }).toList(),
+                  onChanged: (val) =>
+                      setState(() => selectedCategory = val.toString()),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            TextField(
+              controller: locationController,
+              decoration: _inputStyle("Location"),
+            ),
+
+            const SizedBox(height: 15),
+
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.blue.shade100),
+              ),
+              child: ListTile(
+                title: Text(
+                  selectedDate == null
+                      ? "Select Date"
+                      : selectedDate.toString().split(" ")[0],
+                ),
+                trailing: const Icon(Icons.calendar_today, color: Colors.blue),
+                onTap: pickDate,
+              ),
+            ),
+
+            const SizedBox(height: 25),
 
             Row(
               children: [
+
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                    child: const Text('Cancel'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.blue,
+                      elevation: 0,
+                      side: const BorderSide(color: Colors.blue),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: const Text("Cancel"),
                   ),
                 ),
-                const SizedBox(width: 20),
+
+                const SizedBox(width: 15),
+
                 Expanded(
                   child: ElevatedButton(
                     onPressed: submitItem,
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.yellow),
-                    child: const Text('Submit report'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: const Text("Submit Report"),
                   ),
                 ),
               ],
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _input(TextEditingController controller, String hint) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 15),
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          hintText: hint,
-          filled: true,
-          fillColor: Colors.blueGrey[100],
         ),
       ),
     );

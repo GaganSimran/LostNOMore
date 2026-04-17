@@ -120,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (index == 2) {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const LostScreen()),
+                    MaterialPageRoute(builder: (_) => LostScreen(username: _username)),
                   ).then((_) => refreshItems());
                 } else {
                   setState(() => _selectedIndex = index);
@@ -218,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         question: "Missing something?",
                         label: "Lost",
                         color: Colors.red,
-                        navigateTo: const LostScreen(),
+                        navigateTo: LostScreen(username: _username),
                       ),
                       const SizedBox(height: 20),
                       _buildActionButton(
