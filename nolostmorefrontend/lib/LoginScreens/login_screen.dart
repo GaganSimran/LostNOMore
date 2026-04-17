@@ -1,7 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'forget_password_screen.dart';
 import 'signup_screen.dart';
 import 'admin_panel_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -14,9 +20,42 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isPasswordHidden = true;
   bool rememberMe = true;
 
-  void handleLogin() {
-    print("Email: ${emailController.text}");
-    print("Password: ${passwordController.text}");
+  void handleLogin() async {
+    try {
+      final credential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      final user = credential.user;
+
+      if (user != null) {
+
+        final tokenResult = await user.getIdTokenResult(true);
+        final isAdmin = tokenResult.claims?['admin'] == true;
+
+        if (isAdmin) {
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AdminPanelScreen(),
+            ),
+          );
+        } else {
+
+          print("Normal user logged in");
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+      }
+    } catch (e) {
+      print("Login error: $e");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Login failed")),
+      );
+    }
   }
 
   @override
@@ -131,6 +170,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
+                    /*
                     onPressed: handleLogin,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
@@ -143,6 +183,22 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
+            */
+                    onPressed: () async {
+                      final response = await http.post(
+                        Uri.parse('https://nolostmore-backend.onrender.com/admin/create-admin'),
+                        headers: {'Content-Type': 'application/json'},
+                        body: jsonEncode({
+                          'email': 'kbkbistwisted@gmail.com',
+                          'password': '123456789',
+                          'displayName': 'Francis',
+                        }),
+                      );
+
+                      print(response.body);
+                    },
+                    child: Text("Create Admin"),
+                  )
                 ),
 
                 SizedBox(height: 15),

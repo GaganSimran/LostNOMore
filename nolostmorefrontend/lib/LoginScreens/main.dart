@@ -3,7 +3,7 @@ import 'dashboard_screen.dart';
 import 'admin_panel_screen.dart';
 import 'admin_settings_screen.dart';
 import 'reports_screen.dart';
-
+import 'login_screen.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -18,9 +18,10 @@ class MyApp extends StatelessWidget {
       title: 'No Lost More',
 
       // Start page
-      initialRoute: '/dashboard',
+      initialRoute: '/',
 
       routes: {
+        '/': (context) => LoginScreen(),
         '/dashboard': (context) => const DashboardScreen(),
         '/panel': (context) => const AdminPanelScreen(),
         '/settings': (context) => const AdminSettingsScreen(),
