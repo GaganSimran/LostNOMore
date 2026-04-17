@@ -1,11 +1,24 @@
 import 'package:flutter/material.dart';
 import '../widgets/sidebar.dart';
 import '../widgets/header.dart';
-import '../data/mock_report.dart';
-import '../models/report.dart';
+import '../Models/report_service.dart';
+import '../Models/report_model.dart';
 
-class ReportsScreen extends StatelessWidget {
+class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
+
+  @override
+  State<ReportsScreen> createState() => _ReportsScreenState();
+}
+
+class _ReportsScreenState extends State<ReportsScreen> {
+  late Future<List<ReportModel>> futureReports;
+
+  @override
+  void initState() {
+    super.initState();
+    futureReports = ReportService.fetchReports();
+  }
 
   void _handleNavigation(BuildContext context, String item) {
     switch (item) {
@@ -23,7 +36,7 @@ class ReportsScreen extends StatelessWidget {
     }
   }
 
-  Widget _buildRow(Report report) {
+  Widget _buildRow(String userName, int reportCount) {
     return Container(
       margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.all(12),
@@ -35,10 +48,13 @@ class ReportsScreen extends StatelessWidget {
         children: [
           const Icon(Icons.person, color: Colors.black54),
           const SizedBox(width: 10),
-          Expanded(flex: 3, child: Text(report.userName)),
+          Expanded(
+            flex: 3,
+            child: Text(userName),
+          ),
           Expanded(
             child: Text(
-              report.reportCount,
+              reportCount.toString(),
               textAlign: TextAlign.right,
             ),
           ),
@@ -47,10 +63,24 @@ class ReportsScreen extends StatelessWidget {
     );
   }
 
+  Map<String, int> _groupReportsByUser(List<ReportModel> reports) {
+    final Map<String, int> groupedReports = {};
+
+    for (final report in reports) {
+      final String name = report.name.trim().isEmpty ? 'Unknown User' : report.name.trim();
+
+      if (groupedReports.containsKey(name)) {
+        groupedReports[name] = groupedReports[name]! + 1;
+      } else {
+        groupedReports[name] = 1;
+      }
+    }
+
+    return groupedReports;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final List<Report> reports = mockReports;
-
     return Scaffold(
       backgroundColor: const Color(0xFFE0E0E0),
       body: Row(
@@ -117,10 +147,39 @@ class ReportsScreen extends StatelessWidget {
                           const SizedBox(height: 10),
 
                           Expanded(
-                            child: ListView.builder(
-                              itemCount: reports.length,
-                              itemBuilder: (context, index) {
-                                return _buildRow(reports[index]);
+                            child: FutureBuilder<List<ReportModel>>(
+                              future: futureReports,
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+
+                                if (snapshot.hasError) {
+                                  return Center(
+                                    child: Text('Error: ${snapshot.error}'),
+                                  );
+                                }
+
+                                final reports = snapshot.data ?? [];
+
+                                if (reports.isEmpty) {
+                                  return const Center(
+                                    child: Text('No reports found'),
+                                  );
+                                }
+
+                                final groupedReports = _groupReportsByUser(reports);
+                                final users = groupedReports.entries.toList();
+
+                                return ListView.builder(
+                                  itemCount: users.length,
+                                  itemBuilder: (context, index) {
+                                    final user = users[index];
+                                    return _buildRow(user.key, user.value);
+                                  },
+                                );
                               },
                             ),
                           ),

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 
-// Create a report (claim/report)
+
 router.post('/', async (req, res) => {
   try {
     const { item_id, user_id, type, message } = req.body;
@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Update report status (pending/approved/rejected)
+
 router.put('/:id/status', async (req, res) => {
   try {
     const { id } = req.params;

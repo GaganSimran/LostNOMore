@@ -2,16 +2,71 @@ import 'package:flutter/material.dart';
 import '../widgets/sidebar.dart';
 import '../widgets/header.dart';
 import '../widgets/cards.dart';
+import '../Models/item_model.dart';
+import '../Models/item_service.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  int totalLost = 0;
+  int totalFound = 0;
+  int returned = 0;
+  int pending = 0;
+
+  List<Item> items = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDashboardData();
+  }
+
+  Future<void> fetchDashboardData() async {
+    try {
+      final fetchedItems = await ItemService.fetchItems();
+
+      int lost = 0;
+      int found = 0;
+      int returnedCount = 0;
+      int pendingCount = 0;
+
+      for (var item in fetchedItems) {
+        if (item.type.toLowerCase() == 'lost') lost++;
+        if (item.type.toLowerCase() == 'found') found++;
+        if (item.handedToSecurity == true) returnedCount++;
+        if (item.status.toLowerCase() == 'pending') pendingCount++;
+      }
+
+      setState(() {
+        items = fetchedItems;
+        totalLost = lost;
+        totalFound = found;
+        returned = returnedCount;
+        pending = pendingCount;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load dashboard data: $e')),
+      );
+    }
+  }
 
   void _handleNavigation(BuildContext context, String item) {
     switch (item) {
       case 'Dashboard':
         break;
       case 'Manage Posts':
-        //i use pushnamed to switch between the screeens
         Navigator.pushNamed(context, '/panel');
         break;
       case 'Reports':
@@ -20,6 +75,43 @@ class DashboardScreen extends StatelessWidget {
       case 'Settings':
         Navigator.pushNamed(context, '/settings');
         break;
+    }
+  }
+
+  String _getText(Item item) {
+    if (item.handedToSecurity) {
+      return '${item.title} was handed to security';
+    } else if (item.type.toLowerCase() == 'found') {
+      return '${item.title} reported as found';
+    } else {
+      return '${item.title} reported as lost';
+    }
+  }
+
+  IconData _getIcon(Item item) {
+    if (item.status.toLowerCase() == 'pending') return Icons.person_search;
+    if (item.handedToSecurity) return Icons.shield;
+    if (item.type.toLowerCase() == 'found') return Icons.check_circle;
+    return Icons.search;
+  }
+
+  Color _getColor(Item item) {
+    if (item.status.toLowerCase() == 'pending') return Colors.brown;
+    if (item.handedToSecurity) return Colors.blueGrey;
+    if (item.type.toLowerCase() == 'found') return Colors.green;
+    return Colors.grey;
+  }
+
+  String _formatTime(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inMinutes < 60) {
+      return '${difference.inMinutes} min ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours} hrs ago';
+    } else {
+      return '${date.month}/${date.day}/${date.year}';
     }
   }
 
@@ -42,32 +134,32 @@ class DashboardScreen extends StatelessWidget {
                   const AppHeader(title: 'Dashboard'),
                   const SizedBox(height: 30),
 
-                  const Row(
+                  Row(
                     children: [
                       SummaryCard(
                         label: 'Total Lost Items',
-                        count: '25',
+                        count: totalLost.toString(),
                         icon: Icons.search,
                         color: Colors.grey,
                       ),
-                      SizedBox(width: 12),
+                      const SizedBox(width: 12),
                       SummaryCard(
                         label: 'Total Found Items',
-                        count: '6',
+                        count: totalFound.toString(),
                         icon: Icons.check_circle,
                         color: Colors.green,
                       ),
-                      SizedBox(width: 12),
+                      const SizedBox(width: 12),
                       SummaryCard(
                         label: 'Returned Items',
-                        count: '5',
+                        count: returned.toString(),
                         icon: Icons.shield,
                         color: Colors.blueGrey,
                       ),
-                      SizedBox(width: 12),
+                      const SizedBox(width: 12),
                       SummaryCard(
                         label: 'Pending',
-                        count: '2',
+                        count: pending.toString(),
                         icon: Icons.person_search,
                         color: Colors.brown,
                       ),
@@ -87,30 +179,27 @@ class DashboardScreen extends StatelessWidget {
                   const SizedBox(height: 20),
 
                   Expanded(
-                    child: ListView(
-                      children: const [
-                        _ActivityTile(
-                          icon: Icons.search,
-                          text: 'John Doe reported a lost wallet',
-                          time: '2 hours ago',
-                        ),
-                        _ActivityTile(
-                          icon: Icons.check_circle,
-                          text: 'Phone found near campus',
-                          time: 'Aug 24, 2025',
-                          iconColor: Colors.green,
-                        ),
-                        _ActivityTile(
-                          icon: Icons.shield,
-                          text: 'Laptop returned to security',
-                          time: 'May 20, 2025',
-                        ),
-                        _ActivityTile(
-                          icon: Icons.search,
-                          text: 'Keys reported missing',
-                          time: 'May 22, 2024',
-                        ),
-                      ],
+                    child: isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : items.isEmpty
+                        ? const Center(
+                      child: Text(
+                        'No recent activity',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    )
+                        : ListView.builder(
+                      itemCount: items.length,
+                      itemBuilder: (context, index) {
+                        final item = items[index];
+
+                        return _ActivityTile(
+                          icon: _getIcon(item),
+                          text: _getText(item),
+                          time: _formatTime(item.createdAt),
+                          iconColor: _getColor(item),
+                        );
+                      },
                     ),
                   ),
                 ],

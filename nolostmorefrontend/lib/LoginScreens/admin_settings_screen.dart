@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import '../data/mock_admin.dart';
 import '../widgets/sidebar.dart';
 import '../widgets/header.dart';
 import '../widgets/input.dart';
-import '../data/mock_admin.dart';
+import '../models/admin_profile.dart';
+
 
 class AdminSettingsScreen extends StatefulWidget {
   const AdminSettingsScreen({super.key});
@@ -196,50 +198,6 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                             CustomInput(
                               label: 'Contact Email',
                               controller: officeEmailController,
-                            ),
-                            const SizedBox(height: 15),
-
-                            CustomInput(
-                              label: 'Contact Phone',
-                              controller: officePhoneController,
-                            ),
-                            const SizedBox(height: 30),
-
-                            const Text(
-                              'Notifications',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 15),
-
-                            _buildToggleRow(
-                              'Email Notifications',
-                              emailNotifications,
-                                  (value) {
-                                setState(() {
-                                  emailNotifications = value;
-                                });
-                              },
-                            ),
-                            _buildToggleRow(
-                              'New Lost Item Notification',
-                              newLostItemNotification,
-                                  (value) {
-                                setState(() {
-                                  newLostItemNotification = value;
-                                });
-                              },
-                            ),
-                            _buildToggleRow(
-                              'Mark Posts as Pending',
-                              markPostsPending,
-                                  (value) {
-                                setState(() {
-                                  markPostsPending = value;
-                                });
-                              },
                             ),
                           ],
                         ),

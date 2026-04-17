@@ -18,10 +18,10 @@ class MyApp extends StatelessWidget {
       title: 'No Lost More',
 
       // Start page
-      initialRoute: '/',
+      initialRoute: '/dashboard',
 
       routes: {
-        '/': (context) => LoginScreen(),
+
         '/dashboard': (context) => const DashboardScreen(),
         '/panel': (context) => const AdminPanelScreen(),
         '/settings': (context) => const AdminSettingsScreen(),

@@ -1,13 +1,13 @@
 import '../models/admin_profile.dart';
-//mock data to test , then i need to chnage it
-const AdminProfile mockAdminProfile = AdminProfile(
-  fullName: 'Admin',
-  email: 'biller@gmail.com',
-  password: '*************',
-  officeName: 'Main Security Office',
-  officeEmail: 'biller@gmail.com',
-  officePhone: '(123) 333 - 7777',
+
+final AdminProfile mockAdminProfile = AdminProfile(
+  fullName: 'Francis Biller',
+  email: 'francis.admin@lostfound.com',
+  password: '12345678',
+  officeName: 'Campus Security Office',
+  officeEmail: 'security@college.com',
+  officePhone: '+1 519-555-1234',
   emailNotifications: true,
   newLostItemNotification: true,
-  markPostsPending: true,
+  markPostsPending: false,
 );
