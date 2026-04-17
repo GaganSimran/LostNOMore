@@ -36,7 +36,8 @@ class _MyAppState extends State<MyApp> {
 
       home: Stack(
         children: [
-          HomeScreen(username: "Krish", userId: 123, profileImage: "profileImage", bio: "Shutup"),
+         // HomeScreen(username: "Krish", userId: 123, profileImage: "profileImage", bio: "Shutup"),
+          LoginScreen(),
 
           // 🔥 GLOBAL BRIGHTNESS OVERLAY
           IgnorePointer(

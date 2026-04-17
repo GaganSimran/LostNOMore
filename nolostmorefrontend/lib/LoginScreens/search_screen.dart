@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'item_detail_screen.dart';
 
 class SearchScreen extends StatefulWidget {
-
   final String profileImage;
   const SearchScreen({super.key, required this.profileImage});
 
@@ -57,7 +56,6 @@ class _SearchScreenState extends State<SearchScreen> {
       filteredItems = allItems.where((item) {
         final title = (item['title'] ?? "").toString().toLowerCase();
         final code = (item['item_code'] ?? "").toString().toLowerCase();
-
         return title.contains(lower) || code.contains(lower);
       }).toList();
     });
@@ -214,97 +212,119 @@ class _SearchScreenState extends State<SearchScreen> {
 
               const SizedBox(height: 20),
 
-              Builder(
-                builder: (context) {
+              Column(
+                children: filteredItems.map((item) {
 
-                  final items = filteredItems;
+                  final imageUrl = item['image_url'] ?? "";
+                  final hasImage = imageUrl.isNotEmpty &&
+                      imageUrl.toString().startsWith("http");
 
-                  return Column(
-                    children: items.map((item) {
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ItemDetailScreen(item: item),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
+                          )
+                        ],
+                      ),
+                      child: Row(
+                        children: [
 
-                      final imageUrl = item['image_url'] ?? "";
-
-                      final hasImage = imageUrl.isNotEmpty &&
-                          imageUrl.toString().startsWith("http");
-
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ItemDetailScreen(item: item),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              height: 90,
+                              width: 90,
+                              color: Colors.grey[300],
+                              child: hasImage
+                                  ? Image.network(imageUrl, fit: BoxFit.cover)
+                                  : const Icon(Icons.image),
                             ),
-                          );
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 15),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
+                          ),
 
-                              Container(
-                                height: 100,
-                                width: 100,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: Colors.grey[300],
-                                  image: hasImage
-                                      ? DecorationImage(
-                                    image: NetworkImage(imageUrl),
-                                    fit: BoxFit.cover,
-                                  )
-                                      : null,
-                                ),
-                                child: !hasImage
-                                    ? const Icon(Icons.image)
-                                    : null,
-                              ),
+                          const SizedBox(width: 12),
 
-                              const SizedBox(width: 15),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
 
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-
-                                    Text(
-                                      item['title'] ?? "",
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
-                                    ),
-
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "Status: ${item['status'] ?? "pending"}",
-                                          style: const TextStyle(fontSize: 12),
+                                    Expanded(
+                                      child: Text(
+                                        item['title'] ?? "",
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15,
                                         ),
-                                        const SizedBox(width: 5),
-                                        Icon(
-                                          item['status'] == "approved"
-                                              ? Icons.check_box
-                                              : Icons.info_outline,
-                                          size: 14,
-                                          color: item['status'] == "approved"
-                                              ? Colors.green
-                                              : Colors.red,
-                                        ),
-                                      ],
+                                      ),
                                     ),
-
-                                    Text(
-                                      "Item ID: ${item['item_code'] ?? ""}",
-                                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                      decoration: BoxDecoration(
+                                        color: item['status'] == "approved"
+                                            ? Colors.green
+                                            : Colors.orange,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        item['status'] ?? "pending",
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
-                              ),
-                            ],
+
+                                const SizedBox(height: 6),
+
+                                Text(
+                                  item['category'] ?? "",
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 12,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 6),
+
+                                Text(
+                                  "Item ID: ${item['item_code'] ?? ""}",
+                                  style: const TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    }).toList(),
+                        ],
+                      ),
+                    ),
                   );
-                },
+                }).toList(),
               ),
             ],
           ),

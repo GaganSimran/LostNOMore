@@ -19,7 +19,7 @@ class _SignupScreenState extends State<SignupScreen> {
   bool isConfirmPasswordHidden = true;
   void handleSignup() async {
     try {
-      // ✅ VALIDATIONS
+
       if (passwordController.text != confirmPasswordController.text) {
         print("❌ Passwords do not match");
         return;
@@ -35,7 +35,7 @@ class _SignupScreenState extends State<SignupScreen> {
         return;
       }
 
-      // ✅ CREATE USER IN FIREBASE
+
       UserCredential userCredential =
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailController.text.trim(),
@@ -44,7 +44,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
       User? user = userCredential.user;
 
-      // ✅ SEND VERIFICATION EMAIL
+
       await user!.sendEmailVerification();
 
       print("📩 Verification email sent!");
@@ -76,6 +76,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF6F7FB),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 25),
@@ -85,7 +86,7 @@ class _SignupScreenState extends State<SignupScreen> {
               children: [
                 SizedBox(height: 20),
 
-                // 🔙 BACK BUTTON
+                // BACK BUTTON
                 IconButton(
                   icon: Icon(Icons.arrow_back),
                   onPressed: () {
@@ -95,7 +96,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                 SizedBox(height: 10),
 
-                // 🔵 TITLE
+                //  TITLE
                 Center(
                   child: Text(
                     "Register Now",
@@ -109,7 +110,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                 SizedBox(height: 40),
 
-                // 👤 NAME
+                //  NAME
                 TextField(
                   controller: nameController,
                   decoration: InputDecoration(
@@ -126,7 +127,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                 SizedBox(height: 25),
 
-                // 📧 EMAIL
+                //  EMAIL
                 TextField(
                   controller: emailController,
                   decoration: InputDecoration(
@@ -143,7 +144,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                 SizedBox(height: 25),
 
-                // 📞 PHONE
+                //  PHONE
                 TextField(
                   controller: phoneController,
                   decoration: InputDecoration(
@@ -160,7 +161,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                 SizedBox(height: 25),
 
-                // 🔒 PASSWORD
+                //  PASSWORD
                 TextField(
                   controller: passwordController,
                   obscureText: isPasswordHidden,
@@ -188,7 +189,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                 SizedBox(height: 25),
 
-                // 🔒 CONFIRM PASSWORD
+                //  CONFIRM PASSWORD
                 TextField(
                   controller: confirmPasswordController,
                   obscureText: isConfirmPasswordHidden,
@@ -217,7 +218,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                 SizedBox(height: 40),
 
-                // 🔵 SIGNUP BUTTON
+                //  SIGNUP BUTTON
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -231,14 +232,14 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     child: Text(
                       "Signup",
-                      style: TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 16,color: Colors.white70),
                     ),
                   ),
                 ),
 
                 SizedBox(height: 15),
 
-                // 🔵 LOGIN LINK
+                //  LOGIN LINK
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

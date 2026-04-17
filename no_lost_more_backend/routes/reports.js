@@ -51,4 +51,15 @@ router.put('/:id/status', async (req, res) => {
   }
 });
 
+router.post("/reports", async (req, res) => {
+  const { user_id, feature, bug, issue } = req.body;
+
+  await pool.query(
+    "INSERT INTO reports (user_id, feature, bug, issue) VALUES ($1,$2,$3,$4)",
+    [user_id, feature, bug, issue]
+  );
+
+  res.json({ success: true });
+});
+
 module.exports = router;

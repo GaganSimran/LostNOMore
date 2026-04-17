@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:nolostmorefrontend/LoginScreens/app_config.dart';
 import 'dart:convert';
@@ -52,10 +53,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<List> fetchItems() async {
     final res = await http.get(Uri.parse(AppConfig.items));
-
-    print("FETCH STATUS: ${res.statusCode}");
-    print("FETCH BODY: ${res.body}");
-
     return jsonDecode(res.body);
   }
 
@@ -75,7 +72,6 @@ class _HomeScreenState extends State<HomeScreen> {
         username: _username,
         profileImage: _profileImage,
       ),
-
       SettingsScreen(
         username: _username,
         brightness: _brightness,
@@ -107,7 +103,6 @@ class _HomeScreenState extends State<HomeScreen> {
             body: _selectedIndex == 2
                 ? const SizedBox()
                 : screens[_selectedIndex],
-
             bottomNavigationBar: BottomNavigationBar(
               type: BottomNavigationBarType.fixed,
               backgroundColor: Colors.blue[900],
@@ -120,7 +115,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (index == 2) {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => LostScreen(username: _username)),
+                    MaterialPageRoute(
+                      builder: (_) => LostScreen(username: _username),
+                    ),
                   ).then((_) => refreshItems());
                 } else {
                   setState(() => _selectedIndex = index);
@@ -136,7 +133,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-
         IgnorePointer(
           child: AnimatedOpacity(
             duration: const Duration(milliseconds: 100),
@@ -247,9 +243,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: items.length,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 0.75,
+                    crossAxisSpacing: 14,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.72,
                   ),
                   itemBuilder: (context, index) {
                     final item = items[index];
@@ -269,66 +265,109 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 15,
+                              offset: const Offset(0, 8),
+                            )
+                          ],
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
 
                             ClipRRect(
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(10),
-                                topRight: Radius.circular(10),
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(20),
                               ),
-                              child: Container(
-                                height: 110,
-                                width: double.infinity,
-                                color: Colors.grey[300],
-                                child: hasImage
-                                    ? Image.network(
-                                  imageUrl,
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                )
-                                    : const Icon(Icons.image),
+                              child: Stack(
+                                children: [
+                                  SizedBox(
+                                    height: 130,
+                                    width: double.infinity,
+                                    child: hasImage
+                                        ? Image.network(
+                                      imageUrl,
+                                      fit: BoxFit.cover,
+                                    )
+                                        : Container(
+                                      color: Colors.grey[300],
+                                      child: const Icon(Icons.image),
+                                    ),
+                                  ),
+
+                                  Container(
+                                    height: 130,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Colors.black.withOpacity(0.55),
+                                          Colors.transparent
+                                        ],
+                                        begin: Alignment.bottomCenter,
+                                        end: Alignment.topCenter,
+                                      ),
+                                    ),
+                                  ),
+
+                                  Positioned(
+                                    top: 10,
+                                    right: 10,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: item['status'] == "approved"
+                                            ? Colors.green
+                                            : Colors.orange,
+                                        borderRadius: BorderRadius.circular(30),
+                                      ),
+                                      child: Text(
+                                        item['status'] ?? "pending",
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
 
                             Padding(
-                              padding: const EdgeInsets.all(10),
+                              padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     item['title'] ?? "",
-                                    maxLines: 1,
+                                    maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,
-                                      letterSpacing: 0.2,
+                                      height: 1.2,
                                     ),
                                   ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    "Status: ${item['status'] ?? "pending"}",
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.grey[700],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    "Category: ${item['category'] ?? ""}",
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.grey[700],
-                                    ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.label, size: 12, color: Colors.blue),
+                                      const SizedBox(width: 5),
+                                      Expanded(
+                                        child: Text(
+                                          item['category'] ?? "",
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.grey[700],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -365,7 +404,8 @@ class _HomeScreenState extends State<HomeScreen> {
               MaterialPageRoute(builder: (_) => navigateTo),
             );
           },
-          style: ElevatedButton.styleFrom(backgroundColor: color,foregroundColor: Colors.white70),
+          style: ElevatedButton.styleFrom(
+              backgroundColor: color, foregroundColor: Colors.white70),
           child: Text(label),
         ),
       ],

@@ -46,9 +46,8 @@ class _FoundScreenState extends State<FoundScreen> {
     );
 
     if (foundItem != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Item Found ✅")),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Item Found ✅")));
 
       Navigator.push(
         context,
@@ -57,9 +56,8 @@ class _FoundScreenState extends State<FoundScreen> {
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Item Not Found ❌")),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Item Not Found ❌")));
     }
   }
 
@@ -84,7 +82,6 @@ class _FoundScreenState extends State<FoundScreen> {
       }
 
       selectedFilter = type;
-
       final now = DateTime.now();
 
       filteredItems = allItems.where((item) {
@@ -115,7 +112,7 @@ class _FoundScreenState extends State<FoundScreen> {
         child: allItems.isEmpty
             ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -134,7 +131,8 @@ class _FoundScreenState extends State<FoundScreen> {
                   const SizedBox(width: 15),
                   Expanded(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 15),
                       decoration: BoxDecoration(
                         color: Colors.grey[200],
                         borderRadius: BorderRadius.circular(10),
@@ -155,7 +153,8 @@ class _FoundScreenState extends State<FoundScreen> {
               const SizedBox(height: 30),
               const Text(
                 'Find Items',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                style:
+                TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const Divider(),
               const Text(
@@ -191,7 +190,7 @@ class _FoundScreenState extends State<FoundScreen> {
                 ),
               ),
               const Padding(
-                padding: EdgeInsets.symmetric(vertical: 25.0),
+                padding: EdgeInsets.symmetric(vertical: 25),
                 child: Center(
                   child: Text(
                     'OR',
@@ -204,7 +203,8 @@ class _FoundScreenState extends State<FoundScreen> {
               ),
               const Text(
                 'Find by posts',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style:
+                TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const Divider(),
               const SizedBox(height: 10),
@@ -226,57 +226,139 @@ class _FoundScreenState extends State<FoundScreen> {
                 gridDelegate:
                 const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  crossAxisSpacing: 15,
-                  mainAxisSpacing: 15,
-                  childAspectRatio: 0.8,
+                  crossAxisSpacing: 14,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 0.72,
                 ),
                 itemBuilder: (context, index) {
                   final item = filteredItems[index];
-
                   final imageUrl = item['image_url'] ?? "";
-                  final hasImage = imageUrl.isNotEmpty &&
-                      imageUrl.toString().startsWith("http");
+                  final hasImage =
+                      imageUrl.isNotEmpty && imageUrl.startsWith("http");
 
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => ItemDetailScreen(item: item),
+                          builder: (_) =>
+                              ItemDetailScreen(item: item),
                         ),
                       );
                     },
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Container(
-                            height: 130,
-                            width: double.infinity,
-                            color: Colors.grey[300],
-                            child: hasImage
-                                ? Image.network(
-                              imageUrl,
-                              fit: BoxFit.cover,
-                            )
-                                : const Icon(Icons.image),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 15,
+                            offset: const Offset(0, 8),
+                          )
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipRRect(
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(20),
+                            ),
+                            child: Stack(
+                              children: [
+                                SizedBox(
+                                  height: 130,
+                                  width: double.infinity,
+                                  child: hasImage
+                                      ? Image.network(
+                                    imageUrl,
+                                    fit: BoxFit.cover,
+                                  )
+                                      : Container(
+                                    color: Colors.grey[300],
+                                    child: const Icon(Icons.image),
+                                  ),
+                                ),
+                                Container(
+                                  height: 130,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.black.withOpacity(0.55),
+                                        Colors.transparent
+                                      ],
+                                      begin: Alignment.bottomCenter,
+                                      end: Alignment.topCenter,
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 10,
+                                  right: 10,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: item['status'] == "approved"
+                                          ? Colors.green
+                                          : Colors.orange,
+                                      borderRadius:
+                                      BorderRadius.circular(30),
+                                    ),
+                                    child: Text(
+                                      item['status'] ?? "pending",
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '• ${item['title'] ?? ""}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '• Status: ${item['status'] ?? ""}',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        Text(
-                          '• ${item['category'] ?? ""}',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ],
+                          Padding(
+                            padding:
+                            const EdgeInsets.fromLTRB(12, 12, 12, 10),
+                            child: Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item['title'] ?? "",
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.2,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.label,
+                                        size: 12,
+                                        color: Colors.blue),
+                                    const SizedBox(width: 5),
+                                    Expanded(
+                                      child: Text(
+                                        item['category'] ?? "",
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.grey[700],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -292,11 +374,12 @@ class _FoundScreenState extends State<FoundScreen> {
     bool isSelected = selectedFilter == text;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       child: ElevatedButton(
         onPressed: () => applyTimeFilter(text),
         style: ElevatedButton.styleFrom(
-          backgroundColor: isSelected ? Colors.orange : Colors.black87,
+          backgroundColor:
+          isSelected ? Colors.orange : Colors.black87,
         ),
         child: Text(
           text,

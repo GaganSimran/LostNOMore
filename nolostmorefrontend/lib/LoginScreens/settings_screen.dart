@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
 import 'EditProfileScreen.dart';
 import 'login_screen.dart';
-
+import 'app_config.dart';
 class SettingsScreen extends StatefulWidget {
   final String username;
   final String bio;
@@ -240,6 +242,71 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  // ===================== DELETE ACCOUNT ADDED =====================
+
+  void _showDeleteAccountDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Delete Account"),
+          content: const Text(
+            "Are you sure you want to permanently delete your account? This cannot be undone.",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () async {
+                Navigator.pop(context);
+                await _deleteAccount();
+              },
+              child: const Text("Delete"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteAccount() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final uid = user.uid;
+
+      // 1. Delete from backend (CHANGE URL)
+      await http.delete(
+        Uri.parse("${AppConfig.users}/$uid"),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      );
+
+      // 2. Delete from Firebase Auth
+      await user.delete();
+
+      // 3. Go back to login
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => LoginScreen()),
+            (route) => false,
+      );
+    } catch (e) {
+      print("Delete account error: $e");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to delete account")),
+      );
+    }
+  }
+
+  // ===================== END DELETE =====================
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -364,7 +431,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const Divider(),
                 SimpleListTile(title: 'Clear Cache', color: Colors.blue),
                 const Divider(),
-                SimpleListTile(title: 'Delete Account', color: Colors.red),
+                SimpleListTile(title: 'Delete Account', color: Colors.red, onTap: _showDeleteAccountDialog),
                 const Divider(),
                 SimpleListTile(
                   title: 'Logout',

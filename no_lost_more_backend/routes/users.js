@@ -85,4 +85,48 @@ router.put('/:id', async (req, res) => {
     res.status(500).send("Server Error");
   }
 });
+//
+// DELETE USER (ACCOUNT DELETION)
+//
+router.delete('/:uid', async (req, res) => {
+  try {
+    const { uid } = req.params;
+
+    if (!uid) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required"
+      });
+    }
+
+    // delete from database using firebase_uid
+    const deletedUser = await pool.query(
+      'DELETE FROM users WHERE firebase_uid = $1 RETURNING *',
+      [uid]
+    );
+
+    if (deletedUser.rowCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+      user: deletedUser.rows[0]
+    });
+
+  } catch (err) {
+    console.error("Delete user error:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+});
+
+
 module.exports = router;
