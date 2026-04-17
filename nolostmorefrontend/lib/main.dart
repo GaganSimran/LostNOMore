@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:nolostmorefrontend/LoginScreens/home_screen.dart';
 import 'package:nolostmorefrontend/LoginScreens/login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -35,7 +36,7 @@ class _MyAppState extends State<MyApp> {
 
       home: Stack(
         children: [
-          LoginScreen(),
+          HomeScreen(username: "Krish", userId: 123, profileImage: "profileImage", bio: "Shutup"),
 
           // 🔥 GLOBAL BRIGHTNESS OVERLAY
           IgnorePointer(

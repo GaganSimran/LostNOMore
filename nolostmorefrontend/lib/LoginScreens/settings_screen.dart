@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'EditProfileScreen.dart';
+import 'login_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   final String username;
   final String bio;
   final int userId;
-  // ADDED (for global control)
   final double brightness;
   final bool isDarkMode;
   final Function(double) onBrightnessChanged;
   final Function(bool) onThemeChanged;
   final Function(Map<String, dynamic>) onProfileUpdated;
   final String profileImage;
+
   const SettingsScreen({
     super.key,
     required this.username,
@@ -28,10 +29,6 @@ class SettingsScreen extends StatefulWidget {
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
-
-//
-// ================= HELPER WIDGETS =================
-//
 
 class SectionHeader extends StatelessWidget {
   final String title;
@@ -87,12 +84,10 @@ class SliderRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding:
-      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       child: Row(
         children: [
           Icon(icon, color: Colors.grey),
-
           Expanded(
             child: Slider(
               value: value,
@@ -101,7 +96,6 @@ class SliderRow extends StatelessWidget {
               inactiveColor: Colors.grey[400],
             ),
           ),
-
           Icon(iconRight, color: Colors.grey),
         ],
       ),
@@ -112,11 +106,13 @@ class SliderRow extends StatelessWidget {
 class SimpleListTile extends StatelessWidget {
   final String title;
   final Color color;
+  final VoidCallback? onTap;
 
   const SimpleListTile({
     super.key,
     required this.title,
     required this.color,
+    this.onTap,
   });
 
   @override
@@ -127,7 +123,7 @@ class SimpleListTile extends StatelessWidget {
         title,
         style: TextStyle(color: color, fontWeight: FontWeight.w500),
       ),
-      onTap: () {},
+      onTap: onTap,
     );
   }
 }
@@ -158,7 +154,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   double _volume = 0.5;
 
   String profileImage = "";
-
   late String username;
   late String bio;
 
@@ -170,11 +165,75 @@ class _SettingsScreenState extends State<SettingsScreen> {
     profileImage = widget.profileImage;
   }
 
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.logout, size: 40, color: Colors.red),
+                const SizedBox(height: 10),
+                const Text(
+                  "Logout",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  "Are you sure you want to logout?",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Cancel"),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (_) => LoginScreen()),
+                                (route) => false,
+                          );
+                        },
+                        child: const Text("Logout"),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -186,38 +245,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
               fontWeight: FontWeight.bold),
         ),
       ),
-
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-
-          // ================= PROFILE =================
           Row(
             children: [
               CircleAvatar(
                 radius: 35,
                 backgroundImage:
                 profileImage.isNotEmpty ? NetworkImage(profileImage) : null,
-                child: profileImage.isEmpty
-                    ? const Icon(Icons.person)
-                    : null,
+                child:
+                profileImage.isEmpty ? const Icon(Icons.person) : null,
               ),
-
               const SizedBox(width: 16),
-
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
                     Text(username,
                         style: const TextStyle(
                             fontSize: 20, fontWeight: FontWeight.w500)),
-
                     Text(bio,
                         style: const TextStyle(
                             color: Colors.orange, fontSize: 12)),
-
                     TextButton(
                       onPressed: () async {
                         final updated = await Navigator.push(
@@ -239,7 +289,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             profileImage = updated["image"] ?? profileImage;
                           });
 
-                          // SEND BACK TO HOME
                           widget.onProfileUpdated({
                             "name": username,
                             "bio": bio,
@@ -261,12 +310,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ],
           ),
-
           const Divider(height: 30),
-
-          // ================= APPEARANCE =================
           const SectionHeader(title: 'APPEARANCE'),
-
           GroupedContainer(
             child: Column(
               children: [
@@ -276,29 +321,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   value: _volume,
                   onChanged: (v) => setState(() => _volume = v),
                 ),
-
                 const Divider(),
-
-                //BRIGHTNESS (CONNECTED TO GLOBAL)
                 SliderRow(
                   icon: Icons.wb_sunny_outlined,
                   iconRight: Icons.wb_sunny,
                   value: widget.brightness,
                   onChanged: widget.onBrightnessChanged,
                 ),
-
                 const Divider(),
-
-                //DARK MODE (CONNECTED TO GLOBAL)
                 SwitchListTile(
                   title: const Text('Dark Mode'),
                   value: widget.isDarkMode,
                   onChanged: widget.onThemeChanged,
                   activeColor: Colors.blue,
                 ),
-
                 const Divider(),
-
                 ListTile(
                   title: const Text('Color Theme'),
                   trailing: const Text('Light >',
@@ -308,60 +345,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ],
             ),
           ),
-
-          // ================= SYSTEM =================
           const SectionHeader(title: 'SYSTEM'),
-
           GroupedContainer(
             child: Column(
               children: [
                 SimpleListTile(
                     title: 'Clear Search History', color: Colors.blue),
-
                 const Divider(),
-
-                SimpleListTile(
-                    title: 'Clear Cache', color: Colors.blue),
-
+                SimpleListTile(title: 'Clear Cache', color: Colors.blue),
                 const Divider(),
-
+                SimpleListTile(title: 'Delete Account', color: Colors.red),
+                const Divider(),
                 SimpleListTile(
-                    title: 'Delete Account', color: Colors.red),
+                  title: 'Logout',
+                  color: Colors.red,
+                  onTap: _showLogoutDialog,
+                ),
               ],
             ),
           ),
-
-          // ================= CONTACT =================
           const SectionHeader(title: 'CONTACT ME'),
-
           GroupedContainer(
             child: Column(
               children: [
                 IconListTile(
                     icon: Icons.lightbulb_outline,
                     title: 'Suggest New Feature'),
-
                 const Divider(),
-
                 IconListTile(
                     icon: Icons.bug_report_outlined,
                     title: 'Report a bug'),
-
                 const Divider(),
-
-                IconListTile(
-                    icon: Icons.info_outline,
-                    title: 'About us'),
-
+                IconListTile(icon: Icons.info_outline, title: 'About us'),
                 const Divider(),
-
                 IconListTile(
                     icon: Icons.chat_bubble_outline,
                     title: 'Report Issues'),
               ],
             ),
           ),
-
           const SizedBox(height: 80),
         ],
       ),

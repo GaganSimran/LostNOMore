@@ -36,7 +36,6 @@ class _HomeScreenState extends State<HomeScreen> {
   double _brightness = 1.0;
   bool _isDarkMode = false;
 
-  // NEW STATE (IMPORTANT)
   late String _profileImage;
   late String _username;
   late String _bio;
@@ -46,16 +45,13 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     itemsFuture = fetchItems();
 
-    // INIT STATE
     _profileImage = widget.profileImage;
     _username = widget.username;
     _bio = widget.bio;
   }
 
   Future<List> fetchItems() async {
-    final res = await http.get(
-      Uri.parse(AppConfig.items),
-    );
+    final res = await http.get(Uri.parse(AppConfig.items));
 
     print("FETCH STATUS: ${res.statusCode}");
     print("FETCH BODY: ${res.body}");
@@ -75,10 +71,11 @@ class _HomeScreenState extends State<HomeScreen> {
       _homeContent(),
       SearchScreen(profileImage: _profileImage),
       const SizedBox(),
-      NotificationScreen(username: _username,profileImage: _profileImage,),
+      NotificationScreen(
+        username: _username,
+        profileImage: _profileImage,
+      ),
 
-
-      //  UPDATED SETTINGS SCREEN
       SettingsScreen(
         username: _username,
         brightness: _brightness,
@@ -119,22 +116,16 @@ class _HomeScreenState extends State<HomeScreen> {
               showSelectedLabels: false,
               showUnselectedLabels: false,
               currentIndex: _selectedIndex,
-
               onTap: (index) {
                 if (index == 2) {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const LostScreen()),
-                  ).then((_) {
-                    refreshItems();
-                  });
+                  ).then((_) => refreshItems());
                 } else {
-                  setState(() {
-                    _selectedIndex = index;
-                  });
+                  setState(() => _selectedIndex = index);
                 }
               },
-
               items: const [
                 BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
                 BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
@@ -162,7 +153,6 @@ class _HomeScreenState extends State<HomeScreen> {
       child: FutureBuilder(
         future: itemsFuture,
         builder: (context, snapshot) {
-
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -176,20 +166,17 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
 
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-
-                    // PROFILE IMAGE (LEFT SIDE)
                     CircleAvatar(
                       radius: 30,
-                      backgroundImage:
-                      _profileImage.isNotEmpty ? NetworkImage(_profileImage) : null,
-                      child: _profileImage.isEmpty ? const Icon(Icons.person) : null,
+                      backgroundImage: _profileImage.isNotEmpty
+                          ? NetworkImage(_profileImage)
+                          : null,
+                      child: _profileImage.isEmpty
+                          ? const Icon(Icons.person)
+                          : null,
                     ),
-
                     const SizedBox(width: 15),
-
-                    //TEXT (RIGHT SIDE)
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,14 +184,17 @@ class _HomeScreenState extends State<HomeScreen> {
                           Text(
                             "Hello, $_username",
                             style: const TextStyle(
-                                fontSize: 28, fontWeight: FontWeight.bold),
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-
                           const SizedBox(height: 4),
-
                           Text(
                             "Discover What's happening on Campus",
-                            style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[700],
+                            ),
                           ),
                         ],
                       ),
@@ -213,6 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
 
                 const Divider(height: 30),
+
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
@@ -226,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         context,
                         question: "Missing something?",
                         label: "Lost",
-                        color: Colors.red[900]!,
+                        color: Colors.red,
                         navigateTo: const LostScreen(),
                       ),
                       const SizedBox(height: 20),
@@ -234,38 +225,38 @@ class _HomeScreenState extends State<HomeScreen> {
                         context,
                         question: "Found something?",
                         label: "Found",
-                        color: Colors.green[800]!,
-                        navigateTo: FoundScreen(profileImage: _profileImage,),
+                        color: Colors.green,
+                        navigateTo: FoundScreen(profileImage: _profileImage),
                       ),
                     ],
                   ),
                 ),
 
                 const SizedBox(height: 25),
-                const Text("Recent posts",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const Text(
+                  "Recent posts",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
 
                 const Divider(),
-
                 const SizedBox(height: 10),
 
                 GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: items.length,
-                  gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
-                    childAspectRatio: 1.3,
+                    childAspectRatio: 0.75,
                   ),
                   itemBuilder: (context, index) {
                     final item = items[index];
 
                     final imageUrl = item['image_url'] ?? "";
-                    final hasImage = imageUrl.isNotEmpty &&
-                        imageUrl.toString().startsWith("http");
+                    final hasImage =
+                        imageUrl.isNotEmpty && imageUrl.startsWith("http");
 
                     return GestureDetector(
                       onTap: () {
@@ -276,34 +267,74 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         );
                       },
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.grey[100],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
 
-                          Container(
-                            height: 100,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[300],
-                              borderRadius: BorderRadius.circular(10),
-                              image: hasImage
-                                  ? DecorationImage(
-                                image: NetworkImage(imageUrl),
-                                fit: BoxFit.cover,
-                              )
-                                  : null,
+                            ClipRRect(
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(10),
+                                topRight: Radius.circular(10),
+                              ),
+                              child: Container(
+                                height: 110,
+                                width: double.infinity,
+                                color: Colors.grey[300],
+                                child: hasImage
+                                    ? Image.network(
+                                  imageUrl,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                )
+                                    : const Icon(Icons.image),
+                              ),
                             ),
-                            child: !hasImage
-                                ? const Icon(Icons.image)
-                                : null,
-                          ),
 
-                          const SizedBox(height: 5),
-
-                          Text("• ${item['title'] ?? ""}"),
-                          Text("• Status: ${item['status'] ?? "pending"}"),
-                          Text("• ${item['category'] ?? ""}"),
-                        ],
+                            Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item['title'] ?? "",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    "Status: ${item['status'] ?? "pending"}",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey[700],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    "Category: ${item['category'] ?? ""}",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey[700],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
@@ -314,8 +345,8 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
     );
-
   }
+
   Widget _buildActionButton(
       BuildContext context, {
         required String question,
@@ -334,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen> {
               MaterialPageRoute(builder: (_) => navigateTo),
             );
           },
-          style: ElevatedButton.styleFrom(backgroundColor: color),
+          style: ElevatedButton.styleFrom(backgroundColor: color,foregroundColor: Colors.white70),
           child: Text(label),
         ),
       ],
