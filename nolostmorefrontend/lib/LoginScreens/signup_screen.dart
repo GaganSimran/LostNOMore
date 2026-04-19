@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:nolostmorefrontend/LoginScreens/app_config.dart';
+
 class SignupScreen extends StatefulWidget {
   @override
   _SignupScreenState createState() => _SignupScreenState();
@@ -17,24 +18,48 @@ class _SignupScreenState extends State<SignupScreen> {
 
   bool isPasswordHidden = true;
   bool isConfirmPasswordHidden = true;
+
+  String? passwordError;
+  String? confirmPasswordError;
+  String? phoneError;
+  String? emailError;
+
   void handleSignup() async {
+    setState(() {
+      passwordError = null;
+      confirmPasswordError = null;
+      phoneError = null;
+      emailError = null;
+    });
+
     try {
+      if (passwordController.text.length < 8) {
+        setState(() {
+          passwordError = "Password must be at least 8 characters";
+        });
+        return;
+      }
 
       if (passwordController.text != confirmPasswordController.text) {
-        print("❌ Passwords do not match");
+        setState(() {
+          confirmPasswordError = "Passwords do not match";
+        });
         return;
       }
 
       if (!emailController.text.contains("@gmail.com")) {
-        print("❌ Invalid email");
+        setState(() {
+          emailError = "Enter a valid Gmail address";
+        });
         return;
       }
 
       if (phoneController.text.length != 10) {
-        print("❌ Phone must be 10 digits");
+        setState(() {
+          phoneError = "Phone must be 10 digits";
+        });
         return;
       }
-
 
       UserCredential userCredential =
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -44,10 +69,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
       User? user = userCredential.user;
 
-
       await user!.sendEmailVerification();
 
-      print("📩 Verification email sent!");
       final url = Uri.parse("${AppConfig.baseUrl}/users/signup");
 
       final response = await http.post(
@@ -64,6 +87,8 @@ class _SignupScreenState extends State<SignupScreen> {
       );
 
       print(response.body);
+
+      Navigator.pop(context);
     } catch (e) {
       if (e is FirebaseAuthException) {
         print("❌ Firebase Error Code: ${e.code}");
@@ -73,6 +98,7 @@ class _SignupScreenState extends State<SignupScreen> {
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,18 +111,13 @@ class _SignupScreenState extends State<SignupScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 20),
-
-                // BACK BUTTON
                 IconButton(
                   icon: Icon(Icons.arrow_back),
                   onPressed: () {
                     Navigator.pop(context);
                   },
                 ),
-
                 SizedBox(height: 10),
-
-                //  TITLE
                 Center(
                   child: Text(
                     "Register Now",
@@ -107,10 +128,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                 ),
-
                 SizedBox(height: 40),
-
-                //  NAME
                 TextField(
                   controller: nameController,
                   decoration: InputDecoration(
@@ -124,13 +142,11 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                 ),
-
                 SizedBox(height: 25),
-
-                //  EMAIL
                 TextField(
                   controller: emailController,
                   decoration: InputDecoration(
+                    errorText: emailError,
                     prefixIcon: Icon(Icons.email_outlined, color: Colors.grey),
                     hintText: "Email adress",
                     enabledBorder: UnderlineInputBorder(
@@ -141,13 +157,11 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                 ),
-
                 SizedBox(height: 25),
-
-                //  PHONE
                 TextField(
                   controller: phoneController,
                   decoration: InputDecoration(
+                    errorText: phoneError,
                     prefixIcon: Icon(Icons.phone_outlined, color: Colors.grey),
                     hintText: "Phone number",
                     enabledBorder: UnderlineInputBorder(
@@ -158,14 +172,12 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                 ),
-
                 SizedBox(height: 25),
-
-                //  PASSWORD
                 TextField(
                   controller: passwordController,
                   obscureText: isPasswordHidden,
                   decoration: InputDecoration(
+                    errorText: passwordError,
                     prefixIcon: Icon(Icons.lock_outline, color: Colors.grey),
                     hintText: "Password",
                     enabledBorder: UnderlineInputBorder(
@@ -186,14 +198,12 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                 ),
-
                 SizedBox(height: 25),
-
-                //  CONFIRM PASSWORD
                 TextField(
                   controller: confirmPasswordController,
                   obscureText: isConfirmPasswordHidden,
                   decoration: InputDecoration(
+                    errorText: confirmPasswordError,
                     prefixIcon: Icon(Icons.lock_outline, color: Colors.grey),
                     hintText: "Confirm password",
                     enabledBorder: UnderlineInputBorder(
@@ -215,10 +225,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                 ),
-
                 SizedBox(height: 40),
-
-                //  SIGNUP BUTTON
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -232,14 +239,11 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     child: Text(
                       "Signup",
-                      style: TextStyle(fontSize: 16,color: Colors.white70),
+                      style: TextStyle(fontSize: 16, color: Colors.white70),
                     ),
                   ),
                 ),
-
                 SizedBox(height: 15),
-
-                //  LOGIN LINK
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -258,7 +262,6 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ],
                 ),
-
                 SizedBox(height: 20),
               ],
             ),
