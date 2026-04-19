@@ -17,7 +17,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   //this is for the text fields
   late final TextEditingController fullNameController;
   late final TextEditingController emailController;
-  late final TextEditingController passwordController;
+
   late final TextEditingController officeNameController;
   late final TextEditingController officeEmailController;
   late final TextEditingController officePhoneController;
@@ -34,8 +34,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         TextEditingController(text: mockAdminProfile.fullName);
     emailController =
         TextEditingController(text: mockAdminProfile.email);
-    passwordController =
-        TextEditingController(text: mockAdminProfile.password);
+
     officeNameController =
         TextEditingController(text: mockAdminProfile.officeName);
     officeEmailController =
@@ -92,28 +91,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
     );
   }
 
-  Widget _buildPasswordField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CustomInput(
-          label: 'Password',
-          controller: passwordController,
-          isPassword: true,
-        ),
-        const SizedBox(height: 12),
-        ElevatedButton(
-          onPressed: () {},
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF3D47FF),
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-          ),
-          child: const Text('Change Password'),
-        ),
-      ],
-    );
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -176,9 +154,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                             ),
                             const SizedBox(height: 15),
 
-                            _buildPasswordField(),
 
-                            const SizedBox(height: 30),
+
 
                             const Text(
                               'Security Office',

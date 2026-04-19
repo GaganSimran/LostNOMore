@@ -42,13 +42,4 @@ class ItemService {
       throw Exception('Failed to update status');
     }
   }
-  static Future<void> deleteItem(int id) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/items/$id'),
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception('Failed to deny item: ${response.body}');
-    }
-  }
 }

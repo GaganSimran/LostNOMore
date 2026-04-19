@@ -2,7 +2,6 @@
 class AdminProfile {
   final String fullName;
   final String email;
-  final String password;
   final String officeName;
   final String officeEmail;
   final String officePhone;
@@ -13,7 +12,6 @@ class AdminProfile {
   const AdminProfile({
     required this.fullName,
     required this.email,
-    required this.password,
     required this.officeName,
     required this.officeEmail,
     required this.officePhone,
