@@ -5,13 +5,61 @@ class ItemDetailScreen extends StatelessWidget {
 
   const ItemDetailScreen({super.key, required this.item});
 
+  Widget _sectionTitle(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20, bottom: 6),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: Colors.black87,
+        ),
+      ),
+    );
+  }
+
+  Widget _card(Widget child) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final status = (item['status'] ?? "pending").toString().toLowerCase();
+
+    IconData statusIcon = Icons.info_outline;
+    Color statusColor = Colors.blue;
+
+    if (status == "approved") {
+      statusIcon = Icons.check_circle;
+      statusColor = Colors.green;
+    } else if (status == "pending") {
+      statusIcon = Icons.cancel;
+      statusColor = Colors.red;
+    }
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF6F7FB),
 
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -27,20 +75,21 @@ class ItemDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-            // IMAGE
             Container(
               height: 220,
               width: double.infinity,
               decoration: BoxDecoration(
                 color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
                 image: item['image_url'] != ""
                     ? DecorationImage(
-                  image: (item['image_url'] != null && item['image_url'].toString().startsWith("http"))
+                  image: (item['image_url'] != null &&
+                      item['image_url'].toString().startsWith("http"))
                       ? NetworkImage(item['image_url'])
-                      : const NetworkImage("https://via.placeholder.com/150"),
-                        fit: BoxFit.cover,
-                      )
+                      : const NetworkImage(
+                      "https://via.placeholder.com/150"),
+                  fit: BoxFit.cover,
+                )
                     : null,
               ),
               child: item['image_url'] == ""
@@ -58,27 +107,38 @@ class ItemDetailScreen extends StatelessWidget {
 
             const SizedBox(height: 10),
 
-            const Text("Description",
-                style: TextStyle(fontWeight: FontWeight.bold)),
+            _sectionTitle("Description"),
+            _card(
+              Text(
+                item['description'] ?? "",
+                style: const TextStyle(height: 1.5),
+              ),
+            ),
 
-            const SizedBox(height: 5),
+            _sectionTitle("Status"),
+            _card(
+              Row(
+                children: [
+                  Icon(statusIcon, size: 18, color: statusColor),
+                  const SizedBox(width: 8),
+                  Text(
+                    item['status'] ?? "pending",
+                    style: TextStyle(color: statusColor),
+                  ),
+                ],
+              ),
+            ),
 
-            Text(item['description'] ?? ""),
-
-            const SizedBox(height: 15),
-
-            const Text("Status",
-                style: TextStyle(fontWeight: FontWeight.bold)),
-
-            Text(item['status'] ?? "pending"),
-
-            const SizedBox(height: 15),
-
-            const Text("Item ID",
-                style: TextStyle(fontWeight: FontWeight.bold)),
-
-            Text(item['item_code'] ?? ""),
-
+            _sectionTitle("Item ID"),
+            _card(
+              Row(
+                children: [
+                  const Icon(Icons.qr_code, size: 18, color: Colors.blue),
+                  const SizedBox(width: 8),
+                  Text(item['item_code'] ?? ""),
+                ],
+              ),
+            ),
           ],
         ),
       ),

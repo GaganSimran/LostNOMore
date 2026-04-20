@@ -21,7 +21,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void handleLogin() async {
     try {
-      //Firebase Login
       UserCredential userCredential =
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailController.text.trim(),
@@ -34,15 +33,18 @@ class _LoginScreenState extends State<LoginScreen> {
       user = FirebaseAuth.instance.currentUser;
 
       if (!user!.emailVerified) {
-        print("❌ Please verify your email first");
+        print(" Please verify your email first");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Please verify your email first"),
+          ),
+        );
         return;
       }
 
-      print("✅ Email verified — login success");
+      print(" Email verified — login success");
 
-      // CALL LOGIN API (NOT SIGNUP)
       final url = Uri.parse(AppConfig.login);
-
 
       final response = await http.post(
         url,
@@ -62,7 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
         final userId = data['id'];
         final image = data['profile_image'] ?? "";
         final bio = data['bio'] ?? "";
-        //  NAVIGATE WITH REAL NAME
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -75,10 +77,34 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         );
       } else {
-        print("❌ User not found in DB");
+        print("User not found in DB");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("User not found"),
+          ),
+        );
       }
+    } on FirebaseAuthException catch (e) {
+      String message = "Please check email or password";
+
+      if (e.code == 'wrong-password' || e.code == 'user-not-found') {
+        message = "Please check email or password";
+      }
+
+      print("Login error: ${e.toString()}");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+        ),
+      );
     } catch (e) {
-      print("❌ Login error: ${e.toString()}");
+      print(" Login error: ${e.toString()}");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Login failed"),
+        ),
+      );
     }
   }
 
@@ -96,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 Image.asset(
                   "assets/logo.png",
-                  height: 250,
+                  height: 320,
                 ),
 
                 SizedBox(height: 10),

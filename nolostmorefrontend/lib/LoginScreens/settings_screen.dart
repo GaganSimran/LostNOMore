@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'EditProfileScreen.dart';
 import 'login_screen.dart';
 import 'app_config.dart';
+import 'about_us_screen.dart';
+
 class SettingsScreen extends StatefulWidget {
   final String username;
   final String bio;
@@ -133,11 +135,13 @@ class SimpleListTile extends StatelessWidget {
 class IconListTile extends StatelessWidget {
   final IconData icon;
   final String title;
+  final VoidCallback onTap;
 
   const IconListTile({
     super.key,
     required this.icon,
     required this.title,
+    required this.onTap,
   });
 
   @override
@@ -145,9 +149,8 @@ class IconListTile extends StatelessWidget {
     return ListTile(
       dense: true,
       leading: Icon(icon, color: Colors.blue[800], size: 20),
-      title: const Text(""),
-      subtitle: Text(title),
-      onTap: () {},
+      title: Text(title),
+      onTap: onTap,
     );
   }
 }
@@ -165,6 +168,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
     username = widget.username;
     bio = widget.bio;
     profileImage = widget.profileImage;
+  }
+
+  void _showReportDialog(String type) {
+    TextEditingController controller = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Submit $type"),
+          content: TextField(
+            controller: controller,
+            maxLines: 4,
+            decoration: InputDecoration(hintText: "Write here..."),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await http.post(
+                  Uri.parse(AppConfig.reports),
+                  headers: {"Content-Type": "application/json"},
+                  body: '{"type":"$type","message":"${controller.text}"}',
+                );
+                Navigator.pop(context);
+              },
+              child: Text("Submit"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showLogoutDialog() {
@@ -242,8 +280,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // ===================== DELETE ACCOUNT ADDED =====================
-
   void _showDeleteAccountDialog() {
     showDialog(
       context: context,
@@ -279,7 +315,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
       final uid = user.uid;
 
-      // 1. Delete from backend (CHANGE URL)
       await http.delete(
         Uri.parse("${AppConfig.users}/$uid"),
         headers: {
@@ -287,25 +322,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
         },
       );
 
-      // 2. Delete from Firebase Auth
       await user.delete();
 
-      // 3. Go back to login
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => LoginScreen()),
             (route) => false,
       );
     } catch (e) {
-      print("Delete account error: $e");
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to delete account")),
       );
     }
   }
-
-  // ===================== END DELETE =====================
 
   @override
   Widget build(BuildContext context) {
@@ -412,13 +441,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onChanged: widget.onThemeChanged,
                   activeColor: Colors.blue,
                 ),
-                const Divider(),
-                ListTile(
-                  title: const Text('Color Theme'),
-                  trailing: const Text('Light >',
-                      style: TextStyle(color: Colors.blue)),
-                  onTap: () {},
-                ),
               ],
             ),
           ),
@@ -447,17 +469,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 IconListTile(
                     icon: Icons.lightbulb_outline,
-                    title: 'Suggest New Feature'),
+                    title: 'Suggest New Feature',
+                    onTap: () => _showReportDialog("feature")),
                 const Divider(),
                 IconListTile(
                     icon: Icons.bug_report_outlined,
-                    title: 'Report a bug'),
+                    title: 'Report a bug',
+                    onTap: () => _showReportDialog("bug")),
                 const Divider(),
-                IconListTile(icon: Icons.info_outline, title: 'About us'),
+                IconListTile(
+                    icon: Icons.info_outline,
+                    title: 'About us',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => AboutUsScreen()),
+                      );
+                    }),
                 const Divider(),
                 IconListTile(
                     icon: Icons.chat_bubble_outline,
-                    title: 'Report Issues'),
+                    title: 'Report Issues',
+                    onTap: () => _showReportDialog("issue")),
               ],
             ),
           ),

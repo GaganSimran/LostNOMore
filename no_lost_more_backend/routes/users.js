@@ -40,7 +40,7 @@ router.post('/signup', async (req, res) => {
 });
 
 //
-// ✅ LOGIN (FETCH USER NAME)
+//  LOGIN (FETCH USER NAME)
 //
 router.post('/login', async (req, res) => {
   try {

@@ -47,7 +47,7 @@ class _FoundScreenState extends State<FoundScreen> {
 
     if (foundItem != null) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Item Found ✅")));
+          .showSnackBar(const SnackBar(content: Text("Item Found ")));
 
       Navigator.push(
         context,
@@ -57,7 +57,7 @@ class _FoundScreenState extends State<FoundScreen> {
       );
     } else {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Item Not Found ❌")));
+          .showSnackBar(const SnackBar(content: Text("Item Not Found ")));
     }
   }
 

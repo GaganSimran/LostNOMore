@@ -8,7 +8,7 @@ const pool = new Pool({
 });
 
 pool.connect()
-  .then(() => console.log("✅ DB Connected"))
+  .then(() => console.log("✅ DB Connected")) // Can give idea in the render deployment re run
   .catch(err => console.error("❌ DB Connection Error FULL:", err));
 
 module.exports = pool;

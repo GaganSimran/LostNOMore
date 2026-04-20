@@ -91,10 +91,10 @@ class _SignupScreenState extends State<SignupScreen> {
       Navigator.pop(context);
     } catch (e) {
       if (e is FirebaseAuthException) {
-        print("❌ Firebase Error Code: ${e.code}");
-        print("❌ Firebase Message: ${e.message}");
+        print(" Firebase Error Code: ${e.code}");
+        print(" Firebase Message: ${e.message}");
       } else {
-        print("❌ Unknown Error: $e");
+        print(" Unknown Error: $e");
       }
     }
   }
