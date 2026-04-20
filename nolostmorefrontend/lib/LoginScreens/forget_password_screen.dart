@@ -18,7 +18,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
       return;
     }
 
-    // Simple test action
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text("Reset link sent to $email (test mode)"),

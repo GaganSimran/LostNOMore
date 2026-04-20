@@ -40,7 +40,7 @@ class AppSidebar extends StatelessWidget {
             leading: CircleAvatar(backgroundColor: Colors.white24),
             title: Text("Admin", style: TextStyle(color: Colors.white)),
             subtitle: Text(
-              "admin@mail.com",
+              "KBKBisTwisted@gmail.com",
               style: TextStyle(color: Colors.white70, fontSize: 12),
             ),
           ),

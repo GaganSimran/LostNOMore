@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../data/mock_admin.dart';
 import '../widgets/sidebar.dart';
@@ -29,22 +30,29 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   @override
   void initState() {
     super.initState();
-  //we assign the controllers the fake data that we created
-    fullNameController =
-        TextEditingController(text: mockAdminProfile.fullName);
-    emailController =
-        TextEditingController(text: mockAdminProfile.email);
 
-    officeNameController =
-        TextEditingController(text: mockAdminProfile.officeName);
-    officeEmailController =
-        TextEditingController(text: mockAdminProfile.officeEmail);
-    officePhoneController =
-        TextEditingController(text: mockAdminProfile.officePhone);
-//initializr the toggle
-    emailNotifications = mockAdminProfile.emailNotifications;
-    newLostItemNotification = mockAdminProfile.newLostItemNotification;
-    markPostsPending = mockAdminProfile.markPostsPending;
+    final user = FirebaseAuth.instance.currentUser;
+
+    fullNameController = TextEditingController(
+      text: user?.displayName ?? 'Francis Biller',
+    );
+
+    emailController = TextEditingController(
+      text: user?.email ?? '',
+    );
+
+
+    officeNameController = TextEditingController(
+      text: mockAdminProfile.officeName,
+    );
+    officeEmailController = TextEditingController(
+      text: mockAdminProfile.officeEmail,
+    );
+    officePhoneController = TextEditingController(
+      text: mockAdminProfile.officePhone,
+    );
+
+
   }
 
 

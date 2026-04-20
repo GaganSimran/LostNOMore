@@ -1,11 +1,13 @@
-/*import 'package:flutter/material.dart';
-import 'forget_password_screen.dart';
-import 'signup_screen.dart';
-import 'admin_panel_screen.dart';
+import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'forget_password_screen.dart';
+import 'admin_panel_screen.dart';
+
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
@@ -14,11 +16,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool isPasswordHidden = true;
   bool rememberMe = true;
+  bool isLoading = false;
 
-  void handleLogin() async {
+  // ✅ Campus picker
+  String? selectedCampus = 'Main Campus';
+
+  Future<void> handleLogin() async {
     try {
-      final credential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
@@ -26,29 +31,21 @@ class _LoginScreenState extends State<LoginScreen> {
       final user = credential.user;
 
       if (user != null) {
-
         final tokenResult = await user.getIdTokenResult(true);
         final isAdmin = tokenResult.claims?['admin'] == true;
 
-        if (isAdmin) {
+        if (!mounted) return;
 
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AdminPanelScreen(),
-            ),
-          );
-        } else {
-
-          print("Normal user logged in");
-          Navigator.pushReplacementNamed(context, '/home');
-        }
+        Navigator.pushReplacementNamed(
+          context,
+          isAdmin ? '/panel' : '/dashboard',
+        );
       }
-    } catch (e) {
-      print("Login error: $e");
+    } catch (_) {
+      if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Login failed")),
+        const SnackBar(content: Text("Login failed")),
       );
     }
   }
@@ -62,46 +59,75 @@ class _LoginScreenState extends State<LoginScreen> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                SizedBox(height: 40),
+                const SizedBox(height: 40),
 
-                // 🖼️ LOGO IMAGE
+
                 Image.asset(
                   "assets/logo.png",
                   height: 250,
                 ),
 
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
 
-                Text(
-                  "Login",
+
+                const Text(
+                  "ADMIN LOGIN",
                   style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
                     color: Colors.blue,
+                    letterSpacing: 1,
                   ),
                 ),
 
-                SizedBox(height: 40),
+                DropdownButtonFormField<String>(
+                  value: selectedCampus,
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.location_city),
+                    hintText: "Select Campus",
+                    border: OutlineInputBorder(),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'Main Campus',
+                      child: Text('Main Campus'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Downtown Campus',
+                      child: Text('Downtown Campus'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      selectedCampus = value;
+                    });
+                  },
+                ),
 
-                // EMAIL
+
+
+                const SizedBox(height: 20),
+
+
                 TextField(
                   controller: emailController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     prefixIcon: Icon(Icons.email_outlined),
                     hintText: "Enter your email",
                   ),
                 ),
 
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-                // PASSWORD (BIGGER DOTS)
+
+
                 TextField(
                   controller: passwordController,
                   obscureText: isPasswordHidden,
-                  obscuringCharacter: '●', // bigger dot
-                  style: TextStyle(fontSize: 18),
+                  obscuringCharacter: '●',
+                  style: const TextStyle(fontSize: 18),
                   decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.lock_outline),
+                    prefixIcon: const Icon(Icons.lock_outline),
                     hintText: "Password",
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -118,9 +144,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
 
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
 
-                // REMEMBER + FORGOT
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -134,42 +160,43 @@ class _LoginScreenState extends State<LoginScreen> {
                             });
                           },
                         ),
-                        Text("Remember me"),
+                        const Text("Remember me"),
                       ],
                     ),
-
-                    // FORGOT PASSWORD (NO UNDERLINE)
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ForgetPasswordScreen(),
+                            builder: (context) =>
+                            ForgetPasswordScreen(),
                           ),
                         );
                       },
-                      child: Text(
+                      child: const Text(
                         "Forgot password?",
-                        style: TextStyle(
-                          color: Colors.blue,
-                        ),
+                        style: TextStyle(color: Colors.blue),
                       ),
                     ),
                   ],
                 ),
 
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-                // LOGIN BUTTON (WHITE TEXT)
+
                 SizedBox(
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: handleLogin,
+                    onPressed: isLoading ? null : handleLogin,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                     ),
-                    child: Text(
+                    child: isLoading
+                        ? const CircularProgressIndicator(
+                      color: Colors.white,
+                    )
+                        : const Text(
                       "Login",
                       style: TextStyle(
                         color: Colors.white,
@@ -177,33 +204,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                ),
-
-                SizedBox(height: 15),
-
-                // SIGNUP (CLICKABLE)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Don't have account? "),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => SignupScreen(),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        "Signup here",
-                        style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),
@@ -213,5 +213,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-
- */

@@ -51,6 +51,23 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
       );
     }
   }
+  Future<void> _deleteItem(int id) async {
+    try {
+      await ItemService.deleteItem(id);
+
+      setState(() {
+        futureItems = ItemService.fetchItems();
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Item denied (deleted)')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete item: $e')),
+      );
+    }
+  }
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
@@ -133,6 +150,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                 ? Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+
                 ElevatedButton(
                   onPressed: () => _updateStatus(item.id, 'approved'),
                   style: ElevatedButton.styleFrom(
@@ -146,6 +164,17 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                   child: const Text('Accept'),
                 ),
 
+                const SizedBox(width: 8),
+
+
+                ElevatedButton(
+                  onPressed: () => _deleteItem(item.id),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Deny'),
+                ),
               ],
             )
                 : const SizedBox(),

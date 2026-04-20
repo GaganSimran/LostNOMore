@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 
-// Create a notification
+
 router.post('/', async (req, res) => {
   try {
     const { user_id, message } = req.body;
@@ -17,7 +17,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Get all notifications for a user
+
 router.get('/:user_id', async (req, res) => {
   try {
     const { user_id } = req.params;
@@ -32,7 +32,6 @@ router.get('/:user_id', async (req, res) => {
   }
 });
 
-// Mark a notification as read
 router.put('/:id/read', async (req, res) => {
   try {
     const { id } = req.params;
