@@ -15,14 +15,14 @@ class AdminSettingsScreen extends StatefulWidget {
 }
 
 class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
-  //this is for the text fields
+
   late final TextEditingController fullNameController;
   late final TextEditingController emailController;
 
   late final TextEditingController officeNameController;
   late final TextEditingController officeEmailController;
   late final TextEditingController officePhoneController;
-  //this is for the toggles
+
   late bool emailNotifications;
   late bool newLostItemNotification;
   late bool markPostsPending;

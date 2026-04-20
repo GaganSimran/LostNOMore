@@ -18,7 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool rememberMe = true;
   bool isLoading = false;
 
-  // ✅ Campus picker
+
   String? selectedCampus = 'Main Campus';
 
   Future<void> handleLogin() async {
